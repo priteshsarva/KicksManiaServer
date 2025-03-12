@@ -26,6 +26,8 @@ const app = express()
 app.use(bodyParser.json());// for parsing application/json
 
 app.get('/', async (req, res) => {
+console.log("working");
+
     res.set('content-type', 'application/json');
     res.status(200).json({ status: 200, server: "Runnnig" });
 
