@@ -17,7 +17,7 @@ import { fetchDataa } from "./controller/newtemp.js";
 import brand from "./view/brand.js";
 import productBrand from "./view/productBrand.js";
 import { baseUrls } from "./baseUrls.js";
-
+const PORT = process.env.PORT || 5000;
 
 
 
@@ -61,11 +61,11 @@ app.get('/devproductupdates', async (req, res) => {
 
 
 
-app.listen(5000, (err) => {
+app.listen(PORT, (err) => {
     if (err) {
         return console.log(err);
     }
-    console.log('lisitng at 5000');
+    console.log(`Server is running on port ${PORT}`);
 
 })
 
