@@ -22,25 +22,7 @@ DB.run = promisify(DB.run);
 DB.get = promisify(DB.get);
 
 
-// List of possible Chromium paths
-const chromiumPaths = ["/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/lib/chromium/chrome"];
 
-// Function to find the first existing Chromium path
-const getChromiumPath = () => {
-    for (const path of chromiumPaths) {
-        if (fs.existsSync(path)) {
-            console.log(`✅ Chromium found at: ${path}`);
-            return path;
-        }
-    }
-    console.error("❌ Chromium NOT found. Puppeteer may not work!");
-    return null;
-};
-
-// Log the detected Chromium path
-console.log("🔍 Checking for Chromium...");
-// const chromiumPath = process.env.PUPPETEER_EXECUTABLE_PATH || getChromiumPath()
-const chromiumPath =  getChromiumPath()
 
 
 
