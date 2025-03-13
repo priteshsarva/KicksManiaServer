@@ -59,4 +59,4 @@ COPY . .
 EXPOSE 3000
 
 # Launch command
-CMD ["node", "server.js"]
+CMD ["node", "index.js"]
