@@ -1,9 +1,7 @@
 FROM ghcr.io/puppeteer/puppeteer:24.1.1
 
-ENV PUPPETEER_SKIP_DOWNLOAD=TRUE \
-
-# Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
-PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /user/src/app
 

@@ -60,12 +60,20 @@ async function fetchDataa(baseUrls) {
     console.log(Date.now());
 
     const browser = await puppeteer.launch({
-        executablePath: process.env.NODE_ENV ==='production'? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
-        headless: true, // Set to true for headless mode
-        defaultViewport: { width: 1080, height: 800 },
-        args: ['--no-sandbox', '--disable-setuid-sandbox','--single-process','--no-zygote',"--disable-dev-shm-usage",
+        executablePath: process.env.NODE_ENV === "production"
+        ? process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium"
+        : puppeteer.executablePath(),  
+    headless: "new", // Ensures stability in recent Puppeteer versions
+    defaultViewport: { width: 1080, height: 800 },
+    args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--single-process",
+        "--no-zygote",
+        "--disable-dev-shm-usage",
         "--disable-accelerated-2d-canvas",
-        "--disable-gpu"]
+        "--disable-gpu"
+    ],
     });
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
