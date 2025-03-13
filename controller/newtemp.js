@@ -39,7 +39,9 @@ const getChromiumPath = () => {
 
 // Log the detected Chromium path
 console.log("🔍 Checking for Chromium...");
-const chromiumPath = process.env.PUPPETEER_EXECUTABLE_PATH || getChromiumPath()
+// const chromiumPath = process.env.PUPPETEER_EXECUTABLE_PATH || getChromiumPath()
+const chromiumPath =  getChromiumPath()
+
 
 
 
