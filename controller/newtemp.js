@@ -67,6 +67,7 @@ async function fetchDataa(baseUrls) {
     console.log(Date.now());
 
     const browser = await puppeteer.launch({
+        executablePath: '/usr/bin/chromium',
         // executablePath:  process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
         // executablePath: process.env.NODE_ENV === "production"
         // ? process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium"

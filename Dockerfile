@@ -18,6 +18,10 @@
 
 FROM node:18-slim
 
+# Install Chromium
+RUN apt-get update && apt-get install -y chromium && rm -rf /var/lib/apt/lists/*
+
+
 # Install necessary dependencies
 RUN apt-get update && apt-get install -y \
     curl \
