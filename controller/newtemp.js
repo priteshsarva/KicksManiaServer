@@ -7,7 +7,7 @@ import path, { resolve } from 'path';
 import { promisify } from 'util';
 import { fileURLToPath } from 'url';
 import { rejects } from 'assert';
-require("dotenv").config();
+import "dotenv/config";
 
 
 // const baseUrls = ['https://oneshoess.cartpe.in', 'https://reseller-store.cartpe.in'];
