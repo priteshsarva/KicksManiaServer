@@ -21,6 +21,29 @@ puppeteer.use(StealthPlugin());
 DB.run = promisify(DB.run);
 DB.get = promisify(DB.get);
 
+
+// List of possible Chromium paths
+const chromiumPaths = ["/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/lib/chromium/chrome"];
+
+// Function to find the first existing Chromium path
+const getChromiumPath = () => {
+    for (const path of chromiumPaths) {
+        if (fs.existsSync(path)) {
+            console.log(`✅ Chromium found at: ${path}`);
+            return path;
+        }
+    }
+    console.error("❌ Chromium NOT found. Puppeteer may not work!");
+    return null;
+};
+
+// Log the detected Chromium path
+console.log("🔍 Checking for Chromium...");
+const chromiumPath = process.env.PUPPETEER_EXECUTABLE_PATH || getChromiumPath()
+
+
+
+
 // Utility function to introduce delays
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -60,9 +83,10 @@ async function fetchDataa(baseUrls) {
     console.log(Date.now());
 
     const browser = await puppeteer.launch({
-        executablePath: process.env.NODE_ENV === "production"
-        ? process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium"
-        : puppeteer.executablePath(),  
+        executablePath: chromiumPath,
+        // executablePath: process.env.NODE_ENV === "production"
+        // ? process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium"
+        // : puppeteer.executablePath(),  
     headless: "new", // Ensures stability in recent Puppeteer versions
     defaultViewport: { width: 1080, height: 800 },
     args: [
