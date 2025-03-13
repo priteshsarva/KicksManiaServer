@@ -35,7 +35,7 @@ product.get('/allresults', (req, res) => {
 product.get('/all', (req, res) => {
 
     res.set('content-type', 'application/json');
-    let sql = `SELECT * FROM PRODUCTS WHERE LENGTH(TRIM(sizeName)) > 0;`
+    let sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]';`
     // let sql = `SELECT * FROM PRODUCTS WHERE productUrl = "https://oneshoess.cartpe.in/nikee-airforce-1-first-leather-ua-oneshoess.html?color=";`
 
     try {
