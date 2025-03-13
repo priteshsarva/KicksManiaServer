@@ -32,7 +32,27 @@ product.get('/allresults', (req, res) => {
 
 })
 
+product.get('/all', (req, res) => {
 
+    res.set('content-type', 'application/json');
+    let sql = `SELECT * FROM PRODUCTS WHERE LENGTH(TRIM(sizeName)) > 0;`
+    // let sql = `SELECT * FROM PRODUCTS WHERE productUrl = "https://oneshoess.cartpe.in/nikee-airforce-1-first-leather-ua-oneshoess.html?color=";`
+
+    try {
+        DB.all(sql, [], (err, rows) => {
+            if (err) {
+                throw err;
+            }
+            let content = JSON.stringify(rows);
+            res.send(content)
+        })
+    } catch (err) {
+        console.log(err.message);
+        res.status(467)
+        res.send(`{"code":"467","status":${err.message}}`);
+    }
+
+})
 // product.post('/add', (req, res) => {
 //     console.log(req.body);
 
