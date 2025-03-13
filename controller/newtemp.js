@@ -67,11 +67,11 @@ async function fetchDataa(baseUrls) {
     console.log(Date.now());
 
     const browser = await puppeteer.launch({
-        executablePath:  process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+        // executablePath:  process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
         // executablePath: process.env.NODE_ENV === "production"
         // ? process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium"
         // : puppeteer.executablePath(),  
-    headless: "new", // Ensures stability in recent Puppeteer versions
+    headless: true, // Ensures stability in recent Puppeteer versions
     defaultViewport: { width: 1080, height: 800 },
     args: [
         "--no-sandbox",
