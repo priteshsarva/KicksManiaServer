@@ -7,6 +7,7 @@ import path, { resolve } from 'path';
 import { promisify } from 'util';
 import { fileURLToPath } from 'url';
 import { rejects } from 'assert';
+require("dotenv").config();
 
 
 // const baseUrls = ['https://oneshoess.cartpe.in', 'https://reseller-store.cartpe.in'];
@@ -59,9 +60,10 @@ async function fetchDataa(baseUrls) {
     console.log(Date.now());
 
     const browser = await puppeteer.launch({
-        headless: false, // Set to true for headless mode
+        executablePath: process.env.NODE_ENV ==='production'? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+        headless: true, // Set to true for headless mode
         defaultViewport: { width: 1080, height: 800 },
-        args: ['--window-size=1080,800']
+        args: ['--no-sandbox', '--disable-setuid-sandbox','--single-process','--no-zygote']
     });
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
