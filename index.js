@@ -52,16 +52,18 @@ const PORT = process.env.PORT || 5000;
 const app = express()
 app.use(express.json());// for parsing application/json
 // Enable CORS for all routes
-// app.use(cors({
-//     // origin: 'http://localhost:5173', // Allow requests from this origin
-//     // origin: ['http://localhost:5173', 'https://your-frontend-domain.com'], // Allow specific origins
-//     // credentials: true, // Allow credentials (cookies, authorization headers)
+app.use(cors({
+    // origin: 'http://localhost:5173', // Allow requests from this origin
+    // origin: ['http://localhost:5173', 'https://your-frontend-domain.com'], // Allow specific origins
+    // credentials: true, // Allow credentials (cookies, authorization headers)
 
-//     origin: '*', // Allow requests from all origin
-//     credentials: false,// Allow credentials (cookies, authorization headers)
+    origin: '*', // Allow requests from all origin
+    credentials: false,// Allow credentials (cookies, authorization headers)
 
-//     methods: 'GET,POST,PUT,DELETE', // Allow specific HTTP methods
-// }));
+    methods: 'GET,POST,PUT,DELETE', // Allow specific HTTP methods
+}));
+app.options('*', cors()); // Handle preflight requests for all routes
+
 app.get('/', async (req, res) => {
     console.log("working");
 
