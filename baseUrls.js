@@ -1,14 +1,5 @@
 const baseUrls = [
-    'https://hypeshoe.cartpe.in/',
-    'https://kicksmania777.cartpe.in/',
-    'https://shoe-house-1.cartpe.in/',
-    'https://shoebox-1.cartpe.in/',
-    'https://luxurystoreresell.cartpe.in/',
-    'https://shoetrendzreseller.cartpe.in/',
-    'https://foot77loocker12.cartpe.in/',
-    'https://shoeplanetin.cartpe.in/',
-    'https://classyshoesreseller.cartpe.in/',
-    'https://shoemartt.cartpe.in/',
+    
     'https://metro-kicks.cartpe.in/',
     'https://styleloop11.cartpe.in/',
     'https://spshoes.cartpe.in/',
@@ -50,7 +41,17 @@ const baseUrls = [
     'https://ultimate-kicks.cartpe.in/',
     'https://firekicks.cartpe.in/',
     'https://signature-loafers-1.cartpe.in/',
-    'https://shoefly1.cartpe.in/'
+    'https://shoefly1.cartpe.in/',
+    'https://hypeshoe.cartpe.in/',
+    'https://kicksmania777.cartpe.in/',
+    'https://shoe-house-1.cartpe.in/',
+    'https://shoebox-1.cartpe.in/',
+    'https://luxurystoreresell.cartpe.in/',
+    'https://shoetrendzreseller.cartpe.in/',
+    'https://foot77loocker12.cartpe.in/',
+    'https://shoeplanetin.cartpe.in/',
+    'https://classyshoesreseller.cartpe.in/',
+    'https://shoemartt.cartpe.in/',
 ];
 
 
