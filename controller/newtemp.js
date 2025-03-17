@@ -67,18 +67,18 @@ async function fetchDataa(baseUrls) {
     console.log(Date.now());
 
     const browser = await puppeteer.launch({
-        executablePath: '/usr/bin/chromium',
+        executablePath: '/usr/bin/chromium', // for server
         // executablePath:  process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
         // executablePath: process.env.NODE_ENV === "production"
         // ? process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium"
         // : puppeteer.executablePath(),  
-    headless: true, // Ensures stability in recent Puppeteer versions
+    headless: false, // Ensures stability in recent Puppeteer versions
     defaultViewport: { width: 1080, height: 800 },
     args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--single-process",
-        "--no-zygote",
+        // "--single-process",
+        "--no-zygote", 
         "--disable-dev-shm-usage",
         "--disable-accelerated-2d-canvas",
         "--disable-gpu"
@@ -224,13 +224,13 @@ async function scrapeProducts(page, categories, baseUrl) {
                     fs.mkdirSync(imageFolder, { recursive: true });
                 }
 
-                const localImagePaths = [];
-                for (const imageUrl of imageSlides) {
-                    const localPath = await downloadImage(imageUrl, imageFolder);
-                    if (localPath) {
-                        localImagePaths.push(localPath);
-                    }
-                }
+                // const localImagePaths = [];
+                // for (const imageUrl of imageSlides) {
+                //     const localPath = await downloadImage(imageUrl, imageFolder);
+                //     if (localPath) {
+                //         localImagePaths.push(localPath);
+                //     }
+                // }
 
                 // Add product to database
                 catProductss.push({
@@ -240,7 +240,9 @@ async function scrapeProducts(page, categories, baseUrl) {
                     featuredimg: product.featuredimg,
                     sizeName: product.sizes.map(String),
                     productUrl: product.detailUrl,
-                    imageUrl: localImagePaths,
+                    // imageUrl: localImagePaths,
+                    imageUrl: imageSlides, //for img link
+
                     productShortDescription,
                     catName: cat.catTitle,
                     productFetchedFrom: baseUrl
