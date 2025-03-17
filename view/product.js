@@ -53,294 +53,106 @@ product.get('/all', (req, res) => {
     }
 
 })
-// product.post('/add', (req, res) => {
-//     console.log(req.body);
 
-//     const dynamicValues = req.body;// Extracting all keys and values from req.body 
-//     // Constructing the SQL query dynamically
-//     const columns = Object.keys(dynamicValues).join(', ');
-//     const placeholders = Object.keys(dynamicValues).map(() => '?').join(', ');
-//     const values = Object.values(dynamicValues);
+product.get('/results/', (req, res) => {
+    res.set('content-type', 'application/json');
 
+    // Parse query parameters
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
 
-//     res.set('content-type', 'application/json');
-//     // let sql = 'INSERT INTO ENEMIES(ENEMIES_NAME, ENEMIES_REASON) VALUES(?,?)';
-//     // console.log(`INSERT INTO PRODUCTS (${columns}) VALUES (${values})`);
+    // Calculate start and end indices
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
 
+    let sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]';`;
 
-//     let sizeId
-//     if (typeof req.body.sizeName !== 'undefined') {
-//         const sizeName = req.body.sizeName;
+    DB.all(sql, [], (err, rows) => {
+        if (err) {
+            // Handle database error
+            console.error(err.message);
+            res.status(500).json({ code: 500, status: "Internal Server Error", message: err.message });
+            return;
+        }
 
-//         if (typeof sizeName === 'object') {
-//             console.log("inside if for object");
+        // Paginate the results
+        const results = rows.slice(startIndex, endIndex);
 
-//             sizeId = sizeName.map((size) => {
-//                 console.log(`here ${size}`);
-//                 let sizesql = `INSERT INTO SIZES (sizeName) VALUES (?) ON CONFLICT(sizeName) DO NOTHING;`
-//                 try {
-//                     DB.run(sizesql, [size], function (err) {
-//                         if (err) {
-//                             // console.error(err.message); // Log the error message
-//                             // Check for specific error codes if needed
-//                             if (err.code === 'SQLITE_CONSTRAINT') {
-//                                 return res.status(400).send({
-//                                     code: "400",
-//                                     status: "Unique constraint failed",
-//                                     message: "A record with this unique value already exists."
-//                                 });
-//                             } else {
-//                                 return res.status(500).send({
-//                                     code: "500",
-//                                     status: "Internal Server Error",
-//                                     message: err.message
-//                                 });
-//                             }
-//                         }
-//                         if (this.changes === 1) {
+        // Send the response
+        res.json({
+            page,
+            limit,
+            totalItems: rows.length,
+            results,
+        });
+    });
+});
 
-//                             sizeId = this.lastID
-//                         }
+product.get('/search', (req, res) => {
+    res.set('content-type', 'application/json');
 
-//                     })
+    // Parse query parameters
+    const { productName, catName, brand, size, page = 1, limit = 10 } = req.query;
 
-//                 } catch (err) {
-//                     console.log(err.message);
-//                     res.status(467)
-//                     res.send(`{"code":"467","status":${err.message}}`);
-//                 }
-//             })
+    // Calculate offset for pagination
+    const offset = (page - 1) * limit;
 
-//         } else {
-//             console.log("outside if for ibjects");
-//             let sizesql = `INSERT INTO SIZES (sizeName) VALUES (?) ON CONFLICT(sizeName) DO NOTHING;`
-//             try {
-//                 DB.run(sizesql, [sizeName], function (err) {
-//                     if (err) {
-//                         // console.error(err.message); // Log the error message
-//                         // Check for specific error codes if needed
-//                         if (err.code === 'SQLITE_CONSTRAINT') {
-//                             return res.status(400).send({
-//                                 code: "400",
-//                                 status: "Unique constraint failed",
-//                                 message: "A record with this unique value already exists."
-//                             });
-//                         } else {
-//                             return res.status(500).send({
-//                                 code: "500",
-//                                 status: "Internal Server Error",
-//                                 message: err.message
-//                             });
-//                         }
-//                     }
-//                     if (this.changes === 1) {
+    // Base SQL query
+    let sql = `SELECT * FROM PRODUCTS WHERE 1=1`;
+    let params = [];
 
-//                         sizeId = this.lastID
-//                     }
+    // Add search conditions
+    if (productName) {
+        sql += ` AND productName LIKE ?`;
+        params.push(`%${productName}%`);
+    }
+    if (catName) {
+        sql += ` AND catName LIKE ?`;
+        params.push(`%${catName}%`);
+    }
+    if (brand) {
+        sql += ` AND productBrand LIKE ?`;
+        params.push(`%${brand}%`);
+    }
+    if (size) {
+        // Assuming sizeName is stored as a JSON array (e.g., ["40", "41"])
+        sql += ` AND JSON_CONTAINS(sizeName, ?)`;
+        params.push(`"${size}"`);
+    }
 
-//                 })
+    // Add pagination
+    sql += ` LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
 
-//             } catch (err) {
-//                 console.log(err.message);
-//                 res.status(467)
-//                 res.send(`{"code":"467","status":${err.message}}`);
-//             }
-//         }
+    // Execute the query
+    DB.all(sql, params, (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).json({ code: 500, status: "Internal Server Error", message: err.message });
+            return;
+        }
 
+        // Query to get total count of matching products (for pagination metadata)
+        let countSql = sql.replace(/SELECT \* FROM PRODUCTS/, 'SELECT COUNT(*) as total FROM PRODUCTS');
+        countSql = countSql.replace(/LIMIT \? OFFSET \?/, ''); // Remove pagination for count query
 
-//     }
+        DB.get(countSql, params.slice(0, -2), (err, countResult) => { // Exclude limit and offset from params
+            if (err) {
+                console.error(err.message);
+                res.status(500).json({ code: 500, status: "Internal Server Error", message: err.message });
+                return;
+            }
 
-//     let catid
-//     if (typeof req.body.catName !== 'undefined') {
-//         const catName = req.body.catName;
-//         //to check if SizeName Exist or Not
-//         let catNamesql = `INSERT INTO CATEGORIES (catName) VALUES (?) ON CONFLICT(catName) DO NOTHING;`
-//         try {
-//             DB.run(catNamesql, [catName], function (err) {
-//                 if (err) {
-
-//                     if (err.code === 'SQLITE_CONSTRAINT') {
-//                         return res.status(400).send({
-//                             code: "400",
-//                             status: "Unique constraint failed",
-//                             message: "A record with this unique value already exists."
-//                         });
-//                     } else {
-//                         return res.status(500).send({
-//                             code: "500",
-//                             status: "Internal Server Error",
-//                             message: err.message
-//                         });
-//                     }
-//                 }
-
-//                 if (this.changes === 1) {
-//                     catid = this.lastID
-//                 }
-
-//             })
-
-//         } catch (err) {
-//             console.log(err.message);
-//             res.status(467)
-//             res.send(`{"code":"467","status":${err.message}}`);
-//         }
-//     }
-
-
-
-//     let sql = `INSERT INTO PRODUCTS (${columns}) VALUES (${placeholders})`;
-//     let newId;
-
-//     try {
-//         DB.run(sql, [...values], function (err) {
-//             // console.log(err);
-
-//             if (err) {
-//                 // console.error(err.message); // Log the error message
-//                 // Check for specific error codes if needed
-//                 if (err.code === 'SQLITE_CONSTRAINT') {
-//                     return res.status(400).send({
-//                         code: "400",
-//                         status: "Unique constraint failed",
-//                         message: "A record with this unique value already exists.",
-//                         fullerror: err.message
-//                     });
-//                 } else {
-//                     return res.status(500).send({
-//                         code: "500",
-//                         status: "Internal Server Error",
-//                         message: err.message
-//                     });
-//                 }
-//             }
-//             newId = this.lastID;
-//             res.status(201);
-//             let data = { status: 201, message: `data add with id: ${newId}` };
-//             let content = JSON.stringify(data);
-//             res.send(content)
-//         })
-
-//         let sqlProductCat = `SELECT catId FROM CATEGORIES WHERE catName = ?`;
-//         let contentsqlProductCat
-
-//         DB.get(sqlProductCat, [req.body.catName], function (err, rows) {
-//             if (err) {
-
-//                 if (err.code === 'SQLITE_CONSTRAINT') {
-//                     return res.status(400).send({
-//                         code: "400",
-//                         status: "Unique constraint failed",
-//                         message: "A record with this unique value already exists."
-//                     });
-//                 } else {
-//                     return res.status(500).send({
-//                         code: "500",
-//                         status: "Internal Server Error",
-//                         message: err.message
-//                     });
-//                 }
-//             }
-
-//             contentsqlProductCat = JSON.stringify(rows.catId);
-//             console.log(contentsqlProductCat);
-
-//             let productCATsql = `INSERT INTO ProductCategories (ProductId, CategoryId) VALUES (?,?)`;
-//             DB.run(productCATsql, [newId, contentsqlProductCat], function (err) {
-//                 if (err) {
-//                     throw err;
-//                 }
-//             })
-//         })
-
-//         // need to add multiple size adding
-//         console.log(typeof sizeName);
-
-
-//         if (typeof req.body.sizeName === 'object') {
-
-//             req.body.sizeName.map((size) => {
-
-//                 let sqlProductSize = `SELECT sizeId FROM SIZES WHERE sizeName = ?`;
-//                 let contentsqProductSize
-//                 DB.get(sqlProductSize, [size], function (err, rows) {
-//                     if (err) {
-
-//                         if (err.code === 'SQLITE_CONSTRAINT') {
-//                             return res.status(400).send({
-//                                 code: "400",
-//                                 status: "Unique constraint failed",
-//                                 message: "A record with this unique value already exists."
-//                             });
-//                         } else {
-//                             return res.status(500).send({
-//                                 code: "500",
-//                                 status: "Internal Server Error",
-//                                 message: err.message
-//                             });
-//                         }
-//                     }
-
-//                     contentsqProductSize = JSON.stringify(rows.sizeId);
-//                     console.log(`here you FROM OBJECT goo ${contentsqProductSize}`);
-
-//                     let productCATsql = `INSERT INTO ProductSizes (ProductId, SizeId) VALUES (?,?)`;
-//                     DB.run(productCATsql, [newId, contentsqProductSize], function (err) {
-//                         if (err) {
-//                             throw err;
-//                         }
-//                     })
-
-//                 })
-
-//             })
-
-
-
-//         } else {
-
-
-//             let sqlProductSize = `SELECT sizeId FROM SIZES WHERE sizeName = ?`;
-//             let contentsqProductSize
-//             DB.get(sqlProductSize, [req.body.sizeName], function (err, rows) {
-//                 if (err) {
-
-//                     if (err.code === 'SQLITE_CONSTRAINT') {
-//                         return res.status(400).send({
-//                             code: "400",
-//                             status: "Unique constraint failed",
-//                             message: "A record with this unique value already exists."
-//                         });
-//                     } else {
-//                         return res.status(500).send({
-//                             code: "500",
-//                             status: "Internal Server Error",
-//                             message: err.message
-//                         });
-//                     }
-//                 }
-
-//                 contentsqProductSize = JSON.stringify(rows.sizeId);
-//                 console.log(`here you goo ${contentsqProductSize}`);
-
-//                 let productCATsql = `INSERT INTO ProductSizes (ProductId, SizeId) VALUES (?,?)`;
-//                 DB.run(productCATsql, [newId, contentsqProductSize], function (err) {
-//                     if (err) {
-//                         throw err;
-//                     }
-//                 })
-
-//             })
-//         }
-
-
-//     } catch (err) {
-//         console.log(err.message);
-//         res.status(467)
-//         res.send(`{"code":"467","status":${err.message}}`);
-//     }
-// })
-
+            // Send the response
+            res.json({
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalItems: countResult.total,
+                results: rows,
+            });
+        });
+    });
+});
 
 product.post('/add', async (req, res) => {
     try {

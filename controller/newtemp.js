@@ -65,24 +65,26 @@ function getFirstTwoWords(inputString) {
 // Main function to fetch data
 async function fetchDataa(baseUrls) {
     console.log(Date.now());
-
+    while (true) {
     const browser = await puppeteer.launch({
-        executablePath: '/usr/bin/chromium', // for server
-        // executablePath:  process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
-        // executablePath: process.env.NODE_ENV === "production"
-        // ? process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium"
-        // : puppeteer.executablePath(),  
-    headless: true, // Ensures stability in recent Puppeteer versions
-    defaultViewport: { width: 1080, height: 800 },
-    args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        // "--single-process",
-        "--no-zygote", 
-        "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
-        "--disable-gpu"
-    ],
+        //old
+        // executablePath: '/usr/bin/chromium', // for server
+        // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+
+        // headless: true, // Ensures stability in recent Puppeteer versions
+        defaultViewport: { width: 1080, height: 800 },
+        args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            // "--single-process",
+            "--no-zygote",
+            "--disable-dev-shm-usage",
+            "--disable-accelerated-2d-canvas",
+            "--disable-gpu"
+        ],
+        //new
+        headless: process.env.PUPPETEER_HEADLESS === 'true', // Convert string to boolean
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
     });
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
@@ -113,6 +115,7 @@ async function fetchDataa(baseUrls) {
     console.log("finished");
     console.log(Date.now());
     return allproducts;
+}
 }
 
 // Function to scrape categories
