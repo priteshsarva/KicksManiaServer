@@ -72,7 +72,7 @@ async function fetchDataa(baseUrls) {
         // executablePath: process.env.NODE_ENV === "production"
         // ? process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium"
         // : puppeteer.executablePath(),  
-    headless: false, // Ensures stability in recent Puppeteer versions
+    headless: true, // Ensures stability in recent Puppeteer versions
     defaultViewport: { width: 1080, height: 800 },
     args: [
         "--no-sandbox",
