@@ -3,6 +3,72 @@ import express from "express";
 const product = express()
 
 
+
+const sizeMap = {
+    "40": ["40", "40-m6", "40-6.5", "40-6", "UK 6/EURO 40", "UK 6.5/EURO 40", "UK 6 / EURO 40", "UK-6 EUR-40", "M-6", "m-6", "UK 6|Euro 40", "UK 6.5|EURO 40", "U.K-6 Euro-40", "UK-6 EURO-40", "40-UK 6", "40 UK 6", "EURO 40", "40 - 6", "Euro 40- Uk 6"],
+    "41": ["41", "41-7.5", "41-m7", "41-7", "UK 7/EURO 41", "UK7.5/EURO 41", "UK 7 / EURO 41", "UK-7 EUR-41", "7.5", "Euro-41. UK-7", "UK-7.5 EUR-41.5", "Uk 7/Euro 41", "7/ Euro 41", "41/7.5", "41/7", "41/7 5", "M7", "Euro 41", "41 7.5", "41-UK7", "41 UK 7", "UK 7", "41-42"],
+    "42": ["42", "42-8", "42-7.5", "42-m8", "UK 7.5/EURO 42", "UK 8/EURO 42", "UK 8 / EURO 42", "UK-7.5 EUR-42", "m-8", "Euro-42.5 UK-8", "Euro-42. UK-7.5", "UK 8|EURO 42", "UK 8.5|EURO 42", "UK-8 EUR-42", "42-UK 8", "42 UK 8", "EURO 42", "Euro 42-UK 8", "Euro 42-UK 7.5"],
+    "43": ["43", "43-8.5", "43-9", "43-m9", "UK 8.5/EURO 43", "UK 9/EURO 43", "UK 9 / EURO 43", "UK-8.5 EUR-43", "m-9", "Euro-43. Uk-8.5", "UK 9|EURO 43", "UK 9.5|EURO 43", "UK-9 EUR-43", "43-UK 9", "43 UK 9", "EURO 43", "Euro 43-UK 9", "Euro 43-UK 8.5"],
+    "44": ["44", "44-9.5", "44-9", "44-m10", "UK 9.5/EURO 44", "UK 10/EURO 44", "UK 10 / EURO 44", "UK-9.5 EUR-44", "m-10", "Euro-44. Uk-9", "UK 10|EURO 44", "UK-10 EUR-44", "44-UK 10", "44 UK 10", "EURO 44", "Euro 44-UK 9", "Euro 44-UK 9.5"],
+    "45": ["45", "45-10.5", "45-10", "45-m11", "UK 10.5/EURO 45", "UK 11/EURO 45", "UK 11 / EURO 45", "UK-10.5 EUR-45", "m-11", "Euro-45. Uk-10", "UK 10.5|EURO 45", "UK-11 EUR-45", "45-UK 11", "45 UK 11", "EURO 45", "Euro 45-UK 10", "Euro 45-UK 10.5"],
+    "46": ["46", "46-11", "46-UK 12", "UK 11/EURO 46", "UK-11 EUR-46", "UK-10.5 EUR-46", "EURO 46", "Euro-46. Uk-11"],
+    "36": ["36", "36-3.5", "U.K-3.5 Euro-36", "U.K-3 Euro-36", "EURO 36"],
+    "37": ["37", "37-4", "U.K-4 Euro-37", "EURO 37"],
+    "38": ["38", "38-5", "U.K-5 Euro-38", "U.K-5.5 Euro-39", "EURO 38"],
+    "39": ["39", "39-6", "U.K-6 Euro-39", "EURO 39"],
+    "47": ["47", "47/12", "UK 12 / EURO 47", "EURO 47"],
+    "48": ["48"],
+    // "nill": ["MONOGRAM", "CHECKED BROWN", "Black", "Brown", "Gold", "Silver", "Purple", "Regular", "Pcs", "S", "XXL", "M", "L", "XL"]
+};
+
+
+const categories = {
+    "Men's Shoe": [
+        "MENS+SHOES", "EID SALE", "Exclusive Offer", "Diwali Dhamaka Sale", "Winter+Dhamaka+Sale",
+        "Men's Kick", "Diwali Special Sale", "PREMIUM SHOES", "Biggest Sale", "Diwali sale shoes",
+        "End Of Season Sale", "Shoes", "Diwali Offer 2022", "Men's shoes", "shoes+for+men",
+        "Shoe for men", "Biggest sale 2025", "DIWALI SALE", "Shoes for Men", "MENS SHOES",
+        "DIWALI+SALE+", "Men’s Shoes", "Bumper Sale", "Diwali Sale", "Mens+Shoes",
+        "Mega Sale", "Mens's Sneakers", "Men Shoes", "Sale Product", "Slides-Crocs",
+        "Sale Products", "MEN’S SHOES", "SPECIAL SALE", "Men’s Footwear", "sell+itam",
+        "DIWALI+MEN+", "Sale", "Onitsuka+Tiger+Models", "MENS KICKS", "Sale Article"
+    ],
+    "Slides/Crocs": [
+        "FLIPFLOP", "Flipflops/Crocs", "Flip+flops", "Flip-Flop", "Foam&Slide&Crocs",
+        "Crocs+", "CROCS+SLIDE", "slide+", "crocs+%2B+slide+", "Crocs", "crocs+%2B+slide",
+        "Flip-flops & Slides", "Birkenstock slide", "Slides+", "crocs", "FLIP/FLOPS",
+        "Flip-flop", "Flipflops", "FLIP FLOP / SANDALS", "Flip Flops", "FlipFlop & CLOG",
+        "flip flops", "Flip Flops & Crocs"
+    ],
+    "Women's Shoe": [
+        "WOMANS+SHOES", "Women Sports Shoes", "Women's Kick", "womens", "Ladies Shoes",
+        "Women's Shoes", "shoes+for+women", "shoes+for+girls", "Shoe for girls", "PREMIUM+HEELS",
+        "Shoes For Her", "Womans shoes", "women shoes", "Womens+Shoes", "women%27s+%26+men%27s+",
+        "Womens's Sneakers", "WOMEN’S SHOES", "Women’s Shoes", "Women’s Footwear", "WOMENS SHOES",
+        "DIWALI+WOMEN+SELL", "Ladies+Shoes", "womens Kicks"
+    ],
+    "UA Quality": [
+        "UA+QUALITY+SHOE", "UA QUALITY SHOES", "Men Sports Shoes", "wall+Clock",
+        "UA+Quality+Shoes", "Premium Shoes", "UA Quality", "Bottle", "Premium Shoe",
+        "UA+Models", "UA+QUALITY+SHOES", "Ua Quality", "Premium Article", "Premium kicks"
+    ],
+    // "Nill": [
+    //     "Casual Shoes", "KeyChain", "BAG PACK", "Hoodie Unisex", "50% Off", "Lace", 
+    //     "Bags", "Hand bags", "Jackets", "FORMAL", "LOFFER", "mojdi", "long+boots", 
+    //     "SANDAL", "SPORTS", "Belt+", "Wallet+", "Sport Jersey", "Loafer/Formal Shoes", 
+    //     "Yeezy Foam Runner", "SALE % SALE % SALE", "T-Shirts", "Travelling Bags", "Wallet", 
+    //     "Belts", "Hoodies", "Clothing", "SALE", "Mens Accessories", "Mens Watch", "Cap", 
+    //     "Accessories", "Stoles"
+    // ],
+    "Formal": [
+        "Loafers Or Formals", "Formals", "Party Wear Shoes"
+    ]
+};
+
+
+
+
+
 // Import necessary modules
 import { promisify } from 'util';
 
@@ -33,26 +99,86 @@ product.get('/allresults', (req, res) => {
 })
 
 product.get('/all', (req, res) => {
-
     res.set('content-type', 'application/json');
-    let sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]';`
-    // let sql = `SELECT * FROM PRODUCTS WHERE productUrl = "https://oneshoess.cartpe.in/nikee-airforce-1-first-leather-ua-oneshoess.html?color=";`
+
+    const limit = 20;
+    const page = parseInt(req.query.page) || 1; // default to page 1 if not provided
+    const offset = (page - 1) * limit;
+
+    const sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]' LIMIT ? OFFSET ?`;
 
     try {
-        DB.all(sql, [], (err, rows) => {
+        DB.all(sql, [limit, offset], (err, rows) => {
             if (err) {
                 throw err;
             }
-            let content = JSON.stringify(rows);
-            res.send(content)
-        })
+            res.json(rows); // same as res.send(JSON.stringify(rows))
+        });
     } catch (err) {
         console.log(err.message);
-        res.status(467)
-        res.send(`{"code":"467","status":${err.message}}`);
+        res.status(467).send({ code: '467', status: err.message });
+    }
+});
+
+product.get('/search', (req, res) => {
+    const { q = '', brand, size, category } = req.query;
+
+    let sql = `SELECT * FROM products WHERE 1=1 AND sizeName <> '[]' `;
+    const params = [];
+
+    if (q) {
+        sql += ` AND LOWER(productName) LIKE ?`;
+        params.push(`%${q.toLowerCase()}%`);
     }
 
-})
+    if (brand) {
+        sql += ` AND LOWER(productBrand) = ?`;
+        params.push(brand.toLowerCase());
+    }
+
+    if (size) {
+        const normalizedSize = size.trim().toLowerCase();
+        const matchedSizeKey = Object.keys(sizeMap).find((key) =>
+            sizeMap[key].some((variant) => variant.toLowerCase() === normalizedSize)
+        );
+
+        if (matchedSizeKey) {
+            const variants = sizeMap[matchedSizeKey];
+            const likeClauses = variants.map(() => `JSON_EXTRACT(sizeName, '$') LIKE ?`).join(" OR ");
+            sql += ` AND (${likeClauses})`;
+            params.push(...variants.map(v => `%${v}%`));
+        } else {
+            sql += ` AND JSON_EXTRACT(sizeName, '$') LIKE ?`;
+            params.push(`%${size}%`);
+        }
+    }
+
+    if (category) {
+        const normalizedCategory = category.trim().toLowerCase();
+        const matchedCatKey = Object.keys(categories).find((key) =>
+            categories[key].some((variant) => variant.toLowerCase() === normalizedCategory)
+        );
+
+        if (matchedCatKey) {
+            const variants = categories[matchedCatKey];
+            const likeClauses = variants.map(() => `LOWER(productCategory) LIKE ?`).join(" OR ");
+            sql += ` AND (${likeClauses})`;
+            params.push(...variants.map(v => `%${v.toLowerCase()}%`));
+        } else {
+            sql += ` AND LOWER(productCategory) LIKE ?`;
+            params.push(`%${category.toLowerCase()}%`);
+        }
+    }
+
+    DB.all(sql, params, (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        res.json(rows);
+    });
+});
+
 
 product.get('/results/', (req, res) => {
     res.set('content-type', 'application/json');
