@@ -252,7 +252,6 @@ product.post('/add', async (req, res) => {
 });
 
 
-
 product.post('/update', (req, res) => {
     res.set('content-type', 'application/json');
     let query = 'UPDATE PRODUCTS SET ';
@@ -381,8 +380,5 @@ product.delete('/delete', (req, res) => {
     }
 
 })
-
-
-
 
 export default product;
