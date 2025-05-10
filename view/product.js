@@ -101,7 +101,7 @@ product.get('/allresults', (req, res) => {
 product.get('/all', (req, res) => {
     res.set('content-type', 'application/json');
 
-    const limit = 20;
+    const limit = parseInt(req.query.result) || 20;
     const page = parseInt(req.query.page) || 1; // default to page 1 if not provided
     const offset = (page - 1) * limit;
 
@@ -122,6 +122,9 @@ product.get('/all', (req, res) => {
 
 product.get('/search', (req, res) => {
     const { q = '', brand, size, category } = req.query;
+    const limit = parseInt(req.query.result) || 20;
+    const page = parseInt(req.query.page) || 1; // default to page 1 if not provided
+    const offset = (page - 1) * limit;
 
     let sql = `SELECT * FROM products WHERE 1=1 AND sizeName <> '[]' `;
     const params = [];
@@ -161,15 +164,19 @@ product.get('/search', (req, res) => {
 
         if (matchedCatKey) {
             const variants = categories[matchedCatKey];
-            const likeClauses = variants.map(() => `LOWER(productCategory) LIKE ?`).join(" OR ");
+            const likeClauses = variants.map(() => `LOWER(catName) LIKE ?`).join(" OR ");
             sql += ` AND (${likeClauses})`;
             params.push(...variants.map(v => `%${v.toLowerCase()}%`));
         } else {
-            sql += ` AND LOWER(productCategory) LIKE ?`;
+            sql += ` AND LOWER(catName) LIKE ?`;
             params.push(`%${category.toLowerCase()}%`);
         }
     }
 
+
+    sql += ` LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
+    
     DB.all(sql, params, (err, rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
