@@ -120,25 +120,125 @@ product.get('/all', (req, res) => {
     }
 });
 
+// product.get('/search', (req, res) => {
+//     const { q = '', brand, size, category } = req.query;
+//     const limit = parseInt(req.query.result) || 20;
+//     const page = parseInt(req.query.page) || 1; // default to page 1 if not provided
+//     const offset = (page - 1) * limit;
+
+//     let sql = `SELECT * FROM products WHERE 1=1 AND sizeName <> '[]' `;
+//     const params = [];
+
+//     if (q) {
+//         sql += ` AND LOWER(productName) LIKE ?`;
+//         params.push(`%${q.toLowerCase()}%`);
+//     }
+
+//     if (brand) {
+//         sql += ` AND LOWER(productBrand) = ?`;
+//         params.push(brand.toLowerCase());
+//     }
+
+//     if (size) {
+//         const normalizedSize = size.trim().toLowerCase();
+//         const matchedSizeKey = Object.keys(sizeMap).find((key) =>
+//             sizeMap[key].some((variant) => variant.toLowerCase() === normalizedSize)
+//         );
+
+//         if (matchedSizeKey) {
+//             const variants = sizeMap[matchedSizeKey];
+//             const likeClauses = variants.map(() => `JSON_EXTRACT(sizeName, '$') LIKE ?`).join(" OR ");
+//             sql += ` AND (${likeClauses})`;
+//             params.push(...variants.map(v => `%${v}%`));
+//         } else {
+//             sql += ` AND JSON_EXTRACT(sizeName, '$') LIKE ?`;
+//             params.push(`%${size}%`);
+//         }
+//     }
+
+//     if (category) {
+//         const normalizedCategory = category.trim().toLowerCase();
+//         const matchedCatKey = Object.keys(categories).find((key) =>
+//             categories[key].some((variant) => variant.toLowerCase() === normalizedCategory)
+//         );
+
+//         if (matchedCatKey) {
+//             const variants = categories[matchedCatKey];
+//             const likeClauses = variants.map(() => `LOWER(catName) LIKE ?`).join(" OR ");
+//             sql += ` AND (${likeClauses})`;
+//             params.push(...variants.map(v => `%${v.toLowerCase()}%`));
+//         } else {
+//             sql += ` AND LOWER(catName) LIKE ?`;
+//             params.push(`%${category.toLowerCase()}%`);
+//         }
+//     }
+
+//     DB.all(sql, params, (err, rows) => {
+
+//     });
+
+//     sql += ` LIMIT ? OFFSET ?`;
+//     params.push(limit, offset);
+    
+    
+
+
+
+//     DB.all(sql, params, (err, rows) => {
+
+
+//          if (err) {
+//             // Handle database error
+//             console.error(err.message);
+//             res.status(500).json({ code: 500, status: "Internal Server Error", message: err.message });
+//             return;
+//         }
+
+//         // Paginate the results
+//         const results = rows;
+//         const totalPage = Math.ceil(rows.length / limit);
+
+//         // Send the response
+//         res.json({
+//             page,
+//             limit,
+//             totalPage,
+//             totalItems: rows.length,
+//             results,
+//         });
+
+//         // if (err) {
+//         //     return res.status(500).json({ error: err.message });
+//         // }
+
+//         // res.json(rows);
+//     });
+// });
+
+
+
 product.get('/search', (req, res) => {
     const { q = '', brand, size, category } = req.query;
     const limit = parseInt(req.query.result) || 20;
-    const page = parseInt(req.query.page) || 1; // default to page 1 if not provided
+    const page = parseInt(req.query.page) || 1;
     const offset = (page - 1) * limit;
 
-    let sql = `SELECT * FROM products WHERE 1=1 AND sizeName <> '[]' `;
+    let sql = `SELECT * FROM products WHERE 1=1 AND sizeName <> '[]'`;
     const params = [];
 
+    // Handle q
     if (q) {
         sql += ` AND LOWER(productName) LIKE ?`;
         params.push(`%${q.toLowerCase()}%`);
     }
 
+    // Handle brand
     if (brand) {
         sql += ` AND LOWER(productBrand) = ?`;
         params.push(brand.toLowerCase());
     }
 
+    // Handle size
     if (size) {
         const normalizedSize = size.trim().toLowerCase();
         const matchedSizeKey = Object.keys(sizeMap).find((key) =>
@@ -147,15 +247,16 @@ product.get('/search', (req, res) => {
 
         if (matchedSizeKey) {
             const variants = sizeMap[matchedSizeKey];
-            const likeClauses = variants.map(() => `JSON_EXTRACT(sizeName, '$') LIKE ?`).join(" OR ");
+            const likeClauses = variants.map(() => `sizeName LIKE ?`).join(" OR ");
             sql += ` AND (${likeClauses})`;
             params.push(...variants.map(v => `%${v}%`));
         } else {
-            sql += ` AND JSON_EXTRACT(sizeName, '$') LIKE ?`;
+            sql += ` AND sizeName LIKE ?`;
             params.push(`%${size}%`);
         }
     }
 
+    // Handle category
     if (category) {
         const normalizedCategory = category.trim().toLowerCase();
         const matchedCatKey = Object.keys(categories).find((key) =>
@@ -173,16 +274,52 @@ product.get('/search', (req, res) => {
         }
     }
 
-
-    sql += ` LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
-    
-    DB.all(sql, params, (err, rows) => {
+    // Fetch all matching results first
+    DB.all(sql, params, (err, allRows) => {
         if (err) {
+            console.error("DB error:", err);
             return res.status(500).json({ error: err.message });
         }
 
-        res.json(rows);
+        const totalCount = allRows.length;
+        const totalPages = Math.ceil(totalCount / limit);
+        const paginatedRows = allRows.slice(offset, offset + limit);
+
+        res.json({
+            currentPage: page,
+            limit,
+            totalPages,
+            totalCount,
+            results: paginatedRows
+        });
+    });
+});
+
+
+
+product.get('/total-pages', (req, res) => {
+    const limit = parseInt(req.query.result) || 20;
+
+    if (isNaN(limit) || limit <= 0) {
+        return res.status(400).json({ error: "Invalid result (limit) parameter" });
+    }
+
+    const countSql = `SELECT COUNT(*) AS count FROM products WHERE sizeName <> '[]'`;
+
+    DB.get(countSql, [], (err, row) => {
+        if (err) {
+            console.error("SQLite error:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+
+        const totalCount = row.count;
+        const totalPages = Math.ceil(totalCount / limit);
+
+        res.json({
+            totalCount,
+            totalPages,
+            resultPerPage: limit
+        });
     });
 });
 
@@ -210,82 +347,20 @@ product.get('/results/', (req, res) => {
 
         // Paginate the results
         const results = rows.slice(startIndex, endIndex);
+        const totalPage = Math.ceil(rows.length / limit);
 
         // Send the response
         res.json({
             page,
             limit,
+            totalPage,
             totalItems: rows.length,
             results,
         });
     });
 });
 
-product.get('/search', (req, res) => {
-    res.set('content-type', 'application/json');
 
-    // Parse query parameters
-    const { productName, catName, brand, size, page = 1, limit = 10 } = req.query;
-
-    // Calculate offset for pagination
-    const offset = (page - 1) * limit;
-
-    // Base SQL query
-    let sql = `SELECT * FROM PRODUCTS WHERE 1=1`;
-    let params = [];
-
-    // Add search conditions
-    if (productName) {
-        sql += ` AND productName LIKE ?`;
-        params.push(`%${productName}%`);
-    }
-    if (catName) {
-        sql += ` AND catName LIKE ?`;
-        params.push(`%${catName}%`);
-    }
-    if (brand) {
-        sql += ` AND productBrand LIKE ?`;
-        params.push(`%${brand}%`);
-    }
-    if (size) {
-        // Assuming sizeName is stored as a JSON array (e.g., ["40", "41"])
-        sql += ` AND JSON_CONTAINS(sizeName, ?)`;
-        params.push(`"${size}"`);
-    }
-
-    // Add pagination
-    sql += ` LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
-
-    // Execute the query
-    DB.all(sql, params, (err, rows) => {
-        if (err) {
-            console.error(err.message);
-            res.status(500).json({ code: 500, status: "Internal Server Error", message: err.message });
-            return;
-        }
-
-        // Query to get total count of matching products (for pagination metadata)
-        let countSql = sql.replace(/SELECT \* FROM PRODUCTS/, 'SELECT COUNT(*) as total FROM PRODUCTS');
-        countSql = countSql.replace(/LIMIT \? OFFSET \?/, ''); // Remove pagination for count query
-
-        DB.get(countSql, params.slice(0, -2), (err, countResult) => { // Exclude limit and offset from params
-            if (err) {
-                console.error(err.message);
-                res.status(500).json({ code: 500, status: "Internal Server Error", message: err.message });
-                return;
-            }
-
-            // Send the response
-            res.json({
-                page: parseInt(page),
-                limit: parseInt(limit),
-                totalItems: countResult.total,
-                results: rows,
-            });
-        });
-    });
-});
 
 product.post('/add', async (req, res) => {
     try {
