@@ -1,7 +1,14 @@
+import { log } from "console";
 import { DB } from "../connect.js";
 import express from "express";
 const product = express()
 
+// Import necessary modules
+import { promisify } from 'util';
+
+// Promisify DB methods for easier async/await usage
+DB.run = promisify(DB.run);
+DB.get = promisify(DB.get);
 
 
 const sizeMap = {
@@ -69,12 +76,7 @@ const categories = {
 
 
 
-// Import necessary modules
-import { promisify } from 'util';
 
-// Promisify DB methods for easier async/await usage
-DB.run = promisify(DB.run);
-DB.get = promisify(DB.get);
 
 product.get('/allresults', (req, res) => {
 
@@ -101,11 +103,11 @@ product.get('/allresults', (req, res) => {
 product.get('/all', (req, res) => {
     res.set('content-type', 'application/json');
 
-    const limit = parseInt(req.query.result) || 20;
+    const limit = parseInt(req.query.result) || 60;
     const page = parseInt(req.query.page) || 1; // default to page 1 if not provided
     const offset = (page - 1) * limit;
 
-    const sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]' LIMIT ? OFFSET ?`;
+    const sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]' ORDER BY productLastUpdated DESC LIMIT ? OFFSET ?`;
 
     try {
         DB.all(sql, [limit, offset], (err, rows) => {
@@ -120,108 +122,15 @@ product.get('/all', (req, res) => {
     }
 });
 
-// product.get('/search', (req, res) => {
-//     const { q = '', brand, size, category } = req.query;
-//     const limit = parseInt(req.query.result) || 20;
-//     const page = parseInt(req.query.page) || 1; // default to page 1 if not provided
-//     const offset = (page - 1) * limit;
-
-//     let sql = `SELECT * FROM products WHERE 1=1 AND sizeName <> '[]' `;
-//     const params = [];
-
-//     if (q) {
-//         sql += ` AND LOWER(productName) LIKE ?`;
-//         params.push(`%${q.toLowerCase()}%`);
-//     }
-
-//     if (brand) {
-//         sql += ` AND LOWER(productBrand) = ?`;
-//         params.push(brand.toLowerCase());
-//     }
-
-//     if (size) {
-//         const normalizedSize = size.trim().toLowerCase();
-//         const matchedSizeKey = Object.keys(sizeMap).find((key) =>
-//             sizeMap[key].some((variant) => variant.toLowerCase() === normalizedSize)
-//         );
-
-//         if (matchedSizeKey) {
-//             const variants = sizeMap[matchedSizeKey];
-//             const likeClauses = variants.map(() => `JSON_EXTRACT(sizeName, '$') LIKE ?`).join(" OR ");
-//             sql += ` AND (${likeClauses})`;
-//             params.push(...variants.map(v => `%${v}%`));
-//         } else {
-//             sql += ` AND JSON_EXTRACT(sizeName, '$') LIKE ?`;
-//             params.push(`%${size}%`);
-//         }
-//     }
-
-//     if (category) {
-//         const normalizedCategory = category.trim().toLowerCase();
-//         const matchedCatKey = Object.keys(categories).find((key) =>
-//             categories[key].some((variant) => variant.toLowerCase() === normalizedCategory)
-//         );
-
-//         if (matchedCatKey) {
-//             const variants = categories[matchedCatKey];
-//             const likeClauses = variants.map(() => `LOWER(catName) LIKE ?`).join(" OR ");
-//             sql += ` AND (${likeClauses})`;
-//             params.push(...variants.map(v => `%${v.toLowerCase()}%`));
-//         } else {
-//             sql += ` AND LOWER(catName) LIKE ?`;
-//             params.push(`%${category.toLowerCase()}%`);
-//         }
-//     }
-
-//     DB.all(sql, params, (err, rows) => {
-
-//     });
-
-//     sql += ` LIMIT ? OFFSET ?`;
-//     params.push(limit, offset);
-    
-    
-
-
-
-//     DB.all(sql, params, (err, rows) => {
-
-
-//          if (err) {
-//             // Handle database error
-//             console.error(err.message);
-//             res.status(500).json({ code: 500, status: "Internal Server Error", message: err.message });
-//             return;
-//         }
-
-//         // Paginate the results
-//         const results = rows;
-//         const totalPage = Math.ceil(rows.length / limit);
-
-//         // Send the response
-//         res.json({
-//             page,
-//             limit,
-//             totalPage,
-//             totalItems: rows.length,
-//             results,
-//         });
-
-//         // if (err) {
-//         //     return res.status(500).json({ error: err.message });
-//         // }
-
-//         // res.json(rows);
-//     });
-// });
-
-
 
 product.get('/search', (req, res) => {
     const { q = '', brand, size, category } = req.query;
     const limit = parseInt(req.query.result) || 20;
     const page = parseInt(req.query.page) || 1;
     const offset = (page - 1) * limit;
+    console.log(category);
+
+
 
     let sql = `SELECT * FROM products WHERE 1=1 AND sizeName <> '[]' `;
     const params = [];
@@ -248,11 +157,17 @@ product.get('/search', (req, res) => {
         if (matchedSizeKey) {
             const variants = sizeMap[matchedSizeKey];
             const likeClauses = variants.map(() => `sizeName LIKE ?`).join(" OR ");
+            // const likeClauses = variants.map(() => `sizeName = ?`).join(" OR ");
             sql += ` AND (${likeClauses})`;
             params.push(...variants.map(v => `%${v}%`));
+            // params.push(...variants.map(v => `${v}`));
+
         } else {
             sql += ` AND sizeName LIKE ?`;
             params.push(`%${size}%`);
+            // sql += ` AND sizeName = ?`;            
+            // params.push(`${size}`);
+
         }
     }
 
@@ -265,17 +180,25 @@ product.get('/search', (req, res) => {
 
         if (matchedCatKey) {
             const variants = categories[matchedCatKey];
+            // const likeClauses = variants.map(() => `LOWER(catName) = ?`).join(" OR ");
             const likeClauses = variants.map(() => `LOWER(catName) LIKE ?`).join(" OR ");
             sql += ` AND (${likeClauses})`;
-            params.push(...variants.map(v => `%${v.toLowerCase()}%`));
+            // params.push(...variants.map(v => `%${v.toLowerCase()}%`));
+            params.push(...variants.map(v => `${v.toLowerCase()}`));
+
         } else {
-            sql += ` AND LOWER(catName) LIKE ?`;
-            params.push(`%${category.toLowerCase()}%`);
+            // sql += ` AND LOWER(catName) LIKE ?`;
+            // params.push(`%${category.toLowerCase()}%`);
+
+            sql += ` AND LOWER(catName) = ?`;
+            params.push(`${category.toLowerCase()}`);
+
         }
     }
 
-     sql += ` ORDER BY productLastUpdated DESC`;
+    sql += ` ORDER BY productLastUpdated DESC`;
     // Fetch all matching results first
+    log(sql, params)
     DB.all(sql, params, (err, allRows) => {
         if (err) {
             console.error("DB error:", err);
@@ -296,7 +219,48 @@ product.get('/search', (req, res) => {
     });
 });
 
+product.get('/firstdata', (req, res) => {
+    const categories = [
+        "Men's Shoe",
+        "Slides/Crocs",
+        "Women's Shoe",
+        "UA Quality",
+        "Formal"
+    ];
 
+    const itemsPerCategory = 5;
+    const allPromises = categories.map(category => {
+        return new Promise((resolve, reject) => {
+            DB.all(
+                `SELECT * FROM products 
+                 WHERE sizeName <> '[]' 
+                 AND LOWER(catName) LIKE ? 
+                 ORDER BY productLastUpdated DESC 
+                 LIMIT ?`,
+                [`%${category.toLowerCase()}%`, itemsPerCategory],
+                (err, rows) => {
+                    if (err) reject(err);
+                    resolve(rows);
+                }
+            );
+        });
+    });
+
+    Promise.all(allPromises)
+        .then(results => {
+            // Merge all category results into one array
+            const mergedResults = results.flat();
+
+            res.json({
+                totalCount: mergedResults.length,
+                results: mergedResults
+            });
+        })
+        .catch(err => {
+            console.error("Error in /firstdata:", err);
+            res.status(500).json({ error: err.message });
+        });
+});
 
 product.get('/total-pages', (req, res) => {
     const limit = parseInt(req.query.result) || 20;
@@ -330,7 +294,7 @@ product.get('/results/', (req, res) => {
 
     // Parse query parameters
     const page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+    const limit = parseInt(req.query.limit) || 20; // Default to 10 items per page
 
     // Calculate start and end indices
     const startIndex = (page - 1) * limit;
