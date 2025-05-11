@@ -79,7 +79,7 @@ DB.get = promisify(DB.get);
 product.get('/allresults', (req, res) => {
 
     res.set('content-type', 'application/json');
-    let sql = `SELECT * FROM PRODUCTS ;`
+    let sql = `SELECT * FROM PRODUCTS ORDER BY productLastUpdated DESC;`
     // let sql = `SELECT * FROM PRODUCTS WHERE productUrl = "https://oneshoess.cartpe.in/nikee-airforce-1-first-leather-ua-oneshoess.html?color=";`
 
     try {
@@ -223,7 +223,7 @@ product.get('/search', (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const offset = (page - 1) * limit;
 
-    let sql = `SELECT * FROM products WHERE 1=1 AND sizeName <> '[]'`;
+    let sql = `SELECT * FROM products WHERE 1=1 AND sizeName <> '[]' `;
     const params = [];
 
     // Handle q
@@ -274,6 +274,7 @@ product.get('/search', (req, res) => {
         }
     }
 
+     sql += ` ORDER BY productLastUpdated DESC`;
     // Fetch all matching results first
     DB.all(sql, params, (err, allRows) => {
         if (err) {
