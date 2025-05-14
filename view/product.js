@@ -262,6 +262,41 @@ product.get('/firstdata', (req, res) => {
         });
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+product.get('/:id', (req, res) => {
+
+    // let sql = `SELECT * FROM products WHERE 1=1 AND sizeName <> '[]' `;
+    let sql = `SELECT * FROM products WHERE productId = ${req.params.id}`;
+
+    DB.all(sql, (err, allRows) => {
+        if (err) {
+            console.error("DB error:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({
+            results: allRows
+        });
+    });
+
+});
+
+
+
+
 product.get('/total-pages', (req, res) => {
     const limit = parseInt(req.query.result) || 20;
 
