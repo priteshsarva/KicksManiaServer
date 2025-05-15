@@ -275,6 +275,41 @@ product.get('/firstdata', (req, res) => {
 
 
 
+product.get('/results/', (req, res) => {
+    res.set('content-type', 'application/json');
+
+    // Parse query parameters
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 20; // Default to 10 items per page
+
+    // Calculate start and end indices
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    let sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]';`;
+
+    DB.all(sql, [], (err, rows) => {
+        if (err) {
+            // Handle database error
+            console.error(err.message);
+            res.status(500).json({ code: 500, status: "Internal Server Error", message: err.message });
+            return;
+        }
+
+        // Paginate the results
+        const results = rows.slice(startIndex, endIndex);
+        const totalPage = Math.ceil(rows.length / limit);
+
+        // Send the response
+        res.json({
+            page,
+            limit,
+            totalPage,
+            totalItems: rows.length,
+            results,
+        });
+    });
+});
 
 
 product.get('/:id', (req, res) => {
@@ -324,41 +359,6 @@ product.get('/total-pages', (req, res) => {
 });
 
 
-product.get('/results/', (req, res) => {
-    res.set('content-type', 'application/json');
-
-    // Parse query parameters
-    const page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit) || 20; // Default to 10 items per page
-
-    // Calculate start and end indices
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-
-    let sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]';`;
-
-    DB.all(sql, [], (err, rows) => {
-        if (err) {
-            // Handle database error
-            console.error(err.message);
-            res.status(500).json({ code: 500, status: "Internal Server Error", message: err.message });
-            return;
-        }
-
-        // Paginate the results
-        const results = rows.slice(startIndex, endIndex);
-        const totalPage = Math.ceil(rows.length / limit);
-
-        // Send the response
-        res.json({
-            page,
-            limit,
-            totalPage,
-            totalItems: rows.length,
-            results,
-        });
-    });
-});
 
 
 
