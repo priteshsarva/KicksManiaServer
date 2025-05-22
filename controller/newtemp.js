@@ -8,7 +8,8 @@ import { promisify } from 'util';
 import { fileURLToPath } from 'url';
 import { rejects } from 'assert';
 import "dotenv/config";
-const { exec } = require('child_process');
+import { exec } from 'child_process';
+
 
 // const baseUrls = ['https://oneshoess.cartpe.in', 'https://reseller-store.cartpe.in'];
 // const baseUrls = ['https://oneshoess.cartpe.in'];
@@ -372,7 +373,6 @@ async function scrapeProducts(page, categories, baseUrl) {
 //     }
 // }
 
-
 async function addProductToDatabase(product) {
     console.log("from add product");
     console.log(product);
@@ -414,6 +414,7 @@ async function addProductToDatabase(product) {
         throw error;
     }
 }
+
 
 // Function to add many-to-many relationships
 async function addProductRelationships(productId, product) {
