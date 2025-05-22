@@ -103,59 +103,59 @@ function gitAutoCommitAndPush() {
 async function fetchDataa(baseUrls) {
     console.log(Date.now());
     // while (true) {
-        const browser = await puppeteer.launch({
-            //old
-            // executablePath: '/usr/bin/chromium', // for server
-            // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+    const browser = await puppeteer.launch({
+        //old
+        // executablePath: '/usr/bin/chromium', // for server
+        // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
 
-            // headless: true, // Ensures stability in recent Puppeteer versions
-            defaultViewport: { width: 1080, height: 800 },
-            args: [
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                // "--single-process",
-                "--no-zygote",
-                "--disable-dev-shm-usage",
-                "--disable-accelerated-2d-canvas",
-                "--disable-gpu"
-            ],
-            //new
-            headless: process.env.PUPPETEER_HEADLESS === 'true', // Convert string to boolean
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
-        });
-        const page = await browser.newPage();
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+        // headless: true, // Ensures stability in recent Puppeteer versions
+        defaultViewport: { width: 1080, height: 800 },
+        args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            // "--single-process",
+            "--no-zygote",
+            "--disable-dev-shm-usage",
+            "--disable-accelerated-2d-canvas",
+            "--disable-gpu"
+        ],
+        //new
+        headless: process.env.PUPPETEER_HEADLESS === 'true', // Convert string to boolean
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+    });
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
-        const allproducts = [];
+    const allproducts = [];
 
-        // Use a for...of loop to handle asynchronous operations
-        for (const url of baseUrls) {
-            const fullUrl = `${url}/allcategory.html`;
-            let productss = []; // Initialize productss for each URL
+    // Use a for...of loop to handle asynchronous operations
+    for (const url of baseUrls) {
+        const fullUrl = `${url}/allcategory.html`;
+        let productss = []; // Initialize productss for each URL
 
-            try {
-                // Scrape categories from the current URL
-                const categories = await scrapeCategories(page, fullUrl);
-                // Scrape products for each category
-                productss = await scrapeProducts(page, categories, url); // Pass the base URL here
-            } catch (error) {
-                console.error(`Error fetching data from ${url}:`, error);
-            } finally {
-                // Add scraped products to the final array
-                allproducts.push(...productss); // Use spread operator to flatten the array
-            }
+        try {
+            // Scrape categories from the current URL
+            const categories = await scrapeCategories(page, fullUrl);
+            // Scrape products for each category
+            productss = await scrapeProducts(page, categories, url); // Pass the base URL here
+        } catch (error) {
+            console.error(`Error fetching data from ${url}:`, error);
+        } finally {
+            // Add scraped products to the final array
+            allproducts.push(...productss); // Use spread operator to flatten the array
         }
+    }
 
-        // Close the browser after scraping all URLs
-        await browser.close();
+    // Close the browser after scraping all URLs
+    await browser.close();
 
 
 
-        // Call the function when your task is done
-        gitAutoCommitAndPush();
-        console.log("finished");
-        console.log(Date.now());
-        return allproducts;
+    // Call the function when your task is done
+    gitAutoCommitAndPush();
+    console.log("finished");
+    console.log(Date.now());
+    return allproducts;
     // }
 }
 
@@ -331,15 +331,58 @@ async function scrapeProducts(page, categories, baseUrl) {
     return products;
 }
 
+// old
 // Function to add product to database
+// async function addProductToDatabase(product) {
+//     console.log("from add product");
+//     console.log(product);
+
+//     try {
+//         const sql = `INSERT INTO PRODUCTS (
+//             productName, productOriginalPrice, productBrand, featuredimg, sizeName, productUrl, imageUrl, productShortDescription, catName, productFetchedFrom
+//         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+//         // Execute the INSERT query
+//         await DB.run(sql, [
+//             product.productName,
+//             product.productOriginalPrice,
+//             product.productBrand,
+//             product.featuredimg,
+//             JSON.stringify(product.sizeName),
+//             product.productUrl,
+//             JSON.stringify(product.imageUrl),
+//             product.productShortDescription,
+//             product.catName,
+//             product.productFetchedFrom
+//         ]);
+
+//         // Get the last inserted row ID
+//         const row = await DB.get(`SELECT last_insert_rowid() as lastID`);
+//         const lastID = row.lastID;
+
+//         if (!lastID) {
+//             throw new Error('Failed to retrieve last inserted ID');
+//         }
+
+//         console.log('Inserted product with ID:', lastID);
+//         return lastID;
+//     } catch (error) {
+//         console.error('Error adding product to database:', error.message);
+//         throw error; // Re-throw the error to handle it in the calling function
+//     }
+// }
+
+
 async function addProductToDatabase(product) {
     console.log("from add product");
     console.log(product);
 
     try {
         const sql = `INSERT INTO PRODUCTS (
-            productName, productOriginalPrice, productBrand, featuredimg, sizeName, productUrl, imageUrl, productShortDescription, catName, productFetchedFrom
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            productName, productOriginalPrice, productBrand, featuredimg, 
+            sizeName, productUrl, imageUrl, productShortDescription, 
+            catName, productFetchedFrom, productLastUpdated
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
         // Execute the INSERT query
         await DB.run(sql, [
@@ -352,7 +395,8 @@ async function addProductToDatabase(product) {
             JSON.stringify(product.imageUrl),
             product.productShortDescription,
             product.catName,
-            product.productFetchedFrom
+            product.productFetchedFrom,
+            Date.now() // Add current timestamp for new products
         ]);
 
         // Get the last inserted row ID
@@ -367,7 +411,7 @@ async function addProductToDatabase(product) {
         return lastID;
     } catch (error) {
         console.error('Error adding product to database:', error.message);
-        throw error; // Re-throw the error to handle it in the calling function
+        throw error;
     }
 }
 
