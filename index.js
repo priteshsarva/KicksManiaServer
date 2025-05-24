@@ -19,7 +19,8 @@ import productBrand from "./view/productBrand.js";
 import { baseUrls } from "./baseUrls.js";
 import fs from 'fs';
 import cors from 'cors';
-const PORT = process.env.PORT || 5000;
+// const PORT = process.env.PORT || 5000;
+const PORT = 80; // Force port 80 for production behind Cloudflare
 
 
 

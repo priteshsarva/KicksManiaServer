@@ -8,6 +8,7 @@ import { promisify } from 'util';
 import { fileURLToPath } from 'url';
 import { rejects } from 'assert';
 import "dotenv/config";
+import { exec } from 'child_process';
 
 
 // const baseUrls = ['https://oneshoess.cartpe.in', 'https://reseller-store.cartpe.in'];
@@ -62,10 +63,47 @@ function getFirstTwoWords(inputString) {
     return words.slice(0, 2).join(' ');
 }
 
+function gitAutoCommitAndPush() {
+    const now = new Date();
+    const dateTimeString = now.toISOString().replace('T', ' ').split('.')[0]; // Format: YYYY-MM-DD HH:mm:ss
+    const commitMessage = `DB updated on ${dateTimeString}`;
+
+    // Step 1: Add all changes
+    exec('git add .', (err) => {
+        if (err) {
+            console.error('Error adding files:', err);
+            return;
+        }
+        console.log('Changes staged.');
+
+        // Step 2: Commit with message
+        exec(`git commit -m "${commitMessage}"`, (err) => {
+            if (err) {
+                if (err.message.includes('nothing to commit')) {
+                    console.log('No changes to commit.');
+                    return;
+                }
+                console.error('Error committing:', err);
+                return;
+            }
+            console.log('Changes committed.');
+
+            // Step 3: Push to the current branch
+            exec('git push', (err) => {
+                if (err) {
+                    console.error('Error pushing changes:', err);
+                    return;
+                }
+                console.log('Changes pushed to remote repository.');
+            });
+        });
+    });
+}
+
 // Main function to fetch data
 async function fetchDataa(baseUrls) {
     console.log(Date.now());
-    while (true) {
+    // while (true) {
     const browser = await puppeteer.launch({
         //old
         // executablePath: '/usr/bin/chromium', // for server
@@ -112,10 +150,14 @@ async function fetchDataa(baseUrls) {
     // Close the browser after scraping all URLs
     await browser.close();
 
+
+
+    // Call the function when your task is done
+    gitAutoCommitAndPush();
     console.log("finished");
     console.log(Date.now());
     return allproducts;
-}
+    // }
 }
 
 // Function to scrape categories
@@ -290,15 +332,57 @@ async function scrapeProducts(page, categories, baseUrl) {
     return products;
 }
 
+// old
 // Function to add product to database
+// async function addProductToDatabase(product) {
+//     console.log("from add product");
+//     console.log(product);
+
+//     try {
+//         const sql = `INSERT INTO PRODUCTS (
+//             productName, productOriginalPrice, productBrand, featuredimg, sizeName, productUrl, imageUrl, productShortDescription, catName, productFetchedFrom
+//         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+//         // Execute the INSERT query
+//         await DB.run(sql, [
+//             product.productName,
+//             product.productOriginalPrice,
+//             product.productBrand,
+//             product.featuredimg,
+//             JSON.stringify(product.sizeName),
+//             product.productUrl,
+//             JSON.stringify(product.imageUrl),
+//             product.productShortDescription,
+//             product.catName,
+//             product.productFetchedFrom
+//         ]);
+
+//         // Get the last inserted row ID
+//         const row = await DB.get(`SELECT last_insert_rowid() as lastID`);
+//         const lastID = row.lastID;
+
+//         if (!lastID) {
+//             throw new Error('Failed to retrieve last inserted ID');
+//         }
+
+//         console.log('Inserted product with ID:', lastID);
+//         return lastID;
+//     } catch (error) {
+//         console.error('Error adding product to database:', error.message);
+//         throw error; // Re-throw the error to handle it in the calling function
+//     }
+// }
+
 async function addProductToDatabase(product) {
     console.log("from add product");
     console.log(product);
 
     try {
         const sql = `INSERT INTO PRODUCTS (
-            productName, productOriginalPrice, productBrand, featuredimg, sizeName, productUrl, imageUrl, productShortDescription, catName, productFetchedFrom
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            productName, productOriginalPrice, productBrand, featuredimg, 
+            sizeName, productUrl, imageUrl, productShortDescription, 
+            catName, productFetchedFrom, productLastUpdated
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
         // Execute the INSERT query
         await DB.run(sql, [
@@ -311,7 +395,8 @@ async function addProductToDatabase(product) {
             JSON.stringify(product.imageUrl),
             product.productShortDescription,
             product.catName,
-            product.productFetchedFrom
+            product.productFetchedFrom,
+            Date.now() // Add current timestamp for new products
         ]);
 
         // Get the last inserted row ID
@@ -326,9 +411,10 @@ async function addProductToDatabase(product) {
         return lastID;
     } catch (error) {
         console.error('Error adding product to database:', error.message);
-        throw error; // Re-throw the error to handle it in the calling function
+        throw error;
     }
 }
+
 
 // Function to add many-to-many relationships
 async function addProductRelationships(productId, product) {
