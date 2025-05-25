@@ -111,6 +111,8 @@ function gitAutoCommitAndPush() {
 // Main function to fetch data
 async function fetchDataa(baseUrls) {
     console.log(Date.now());
+    gitAutoCommitAndPush();
+
     // while (true) {
     const browser = await puppeteer.launch({
         //old
