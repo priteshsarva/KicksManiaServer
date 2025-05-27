@@ -31,7 +31,7 @@ DB.get = promisify(DB.get);
 
 // Utility function to introduce delays
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-   
+
 
 // Get the current directory name
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -64,49 +64,49 @@ function getFirstTwoWords(inputString) {
     return words.slice(0, 2).join(' ');
 }
 function gitAutoCommitAndPush() {
-  const now = new Date();
-  const dateTimeString = now.toISOString().replace('T', ' ').split('.')[0]; // Format: YYYY-MM-DD HH:mm:ss
-  const commitMessage = `DB updated on ${dateTimeString}`;
+    const now = new Date();
+    const dateTimeString = now.toISOString().replace('T', ' ').split('.')[0]; // Format: YYYY-MM-DD HH:mm:ss
+    const commitMessage = `DB updated on ${dateTimeString}`;
 
-  // Step 1: Add all changes
-  exec('git add .', (err) => {
-    if (err) {
-      console.error('❌ Error adding files:', err);
-      return;
-    }
-    console.log('✅ Changes staged.');
-
-    // Step 2: Commit with message
-    exec(`git commit -m "${commitMessage}"`, (err) => {
-      if (err) {
-        if (err.message.includes('nothing to commit')) {
-          console.log('ℹ️ No changes to commit.');
-          return;
-        }
-        console.error('❌ Error committing:', err);
-        return;
-      }
-      console.log('✅ Changes committed.');
-
-      // Step 3: Pull before pushing to avoid remote conflicts
-      exec('git pull --rebase', (err, stdout, stderr) => {
+    // Step 1: Add all changes
+    exec('git add .', (err) => {
         if (err) {
-          console.error('❌ Error pulling from remote:', stderr || err);
-          return;
-        }
-        console.log('✅ Pulled latest changes from remote.');
-
-        // Step 4: Push to remote
-        exec('git push', (err) => {
-          if (err) {
-            console.error('❌ Error pushing to remote:', err);
+            console.error('❌ Error adding files:', err);
             return;
-          }
-          console.log('✅ Changes pushed to remote repository.');
+        }
+        console.log('✅ Changes staged.');
+
+        // Step 2: Commit with message
+        exec(`git commit -m "${commitMessage}"`, (err) => {
+            if (err) {
+                if (err.message.includes('nothing to commit')) {
+                    console.log('ℹ️ No changes to commit.');
+                    return;
+                }
+                console.error('❌ Error committing:', err);
+                return;
+            }
+            console.log('✅ Changes committed.');
+
+            // Step 3: Pull before pushing to avoid remote conflicts
+            exec('git pull --rebase', (err, stdout, stderr) => {
+                if (err) {
+                    console.error('❌ Error pulling from remote:', stderr || err);
+                    return;
+                }
+                console.log('✅ Pulled latest changes from remote.');
+
+                // Step 4: Push to remote
+                exec('git push', (err) => {
+                    if (err) {
+                        console.error('❌ Error pushing to remote:', err);
+                        return;
+                    }
+                    console.log('✅ Changes pushed to remote repository.');
+                });
+            });
         });
-      });
     });
-  });
 }
 
 // Main function to fetch data
@@ -256,15 +256,22 @@ async function scrapeProducts(page, categories, baseUrl) {
 
             const productElements = await page.evaluate(() => {
                 const elements = document.querySelectorAll('.single-product');
-                return Array.from(elements).map(element => ({
-                    title: element.querySelector('.product-details > a > h6')?.innerText.trim(),
-                    price: element.querySelector('.product-details > div > h6:nth-child(1)')?.innerText.trim(),
-                    featuredimg: element.querySelector('.product-img-block img')?.src,
-                    detailUrl: element.querySelector('.product-img-block img')?.parentElement.getAttribute('href'),
-                    sizes: Array.from(element.querySelectorAll('.product-details > div > div > label'))
-                        .slice(1) // Skip the first label if it's not a size
-                        .map(label => label.innerText.trim()),
-                }));
+                return Array.from(elements).map(element => {
+                    const button = element.querySelector('.product-details > div > button');
+                    const sizes = button && button.innerText.trim() === 'Add to Cart'
+                        ? Array.from(element.querySelectorAll('.product-details > div > div > label'))
+                            .slice(1)
+                            .map(label => label.innerText.trim())
+                        : [];
+
+                    return {
+                        title: element.querySelector('.product-details > a > h6')?.innerText.trim(),
+                        price: element.querySelector('.product-details > div > h6:nth-child(1)')?.innerText.trim(),
+                        featuredimg: element.querySelector('.product-img-block img')?.src,
+                        detailUrl: element.querySelector('.product-img-block img')?.parentElement.getAttribute('href'),
+                        sizes: sizes,
+                    };
+                });
             });
 
             // console.log(productElements);
