@@ -257,12 +257,15 @@ async function scrapeProducts(page, categories, baseUrl) {
             const productElements = await page.evaluate(() => {
                 const elements = document.querySelectorAll('.single-product');
                 return Array.from(elements).map(element => {
-                    const button = element.querySelector('.product-details > div > button');
-                    const sizes = button && button.innerText.trim() === 'Add to Cart'
-                        ? Array.from(element.querySelectorAll('.product-details > div > div > label'))
-                            .slice(1)
-                            .map(label => label.innerText.trim())
-                        : [];
+                    const sizeLabels = element.querySelectorAll('.product-details > div > div > label');
+                    const isSoldOut = element.querySelector('button')?.innerText.trim().toLowerCase() === 'sold out';
+
+                    let sizes = [];
+                    if (!isSoldOut && sizeLabels.length > 1) {
+                        sizes = Array.from(sizeLabels)
+                            .slice(1) // Skip the "Size :" label
+                            .map(label => label.innerText.trim());
+                    }
 
                     return {
                         title: element.querySelector('.product-details > a > h6')?.innerText.trim(),
@@ -272,6 +275,7 @@ async function scrapeProducts(page, categories, baseUrl) {
                         sizes: sizes,
                     };
                 });
+
             });
 
             // console.log(productElements);
@@ -707,7 +711,7 @@ async function updateProduct(product) {
             //     values.push(Date.now());
             // }
             updates.push(`productLastUpdated = ?`);
-                values.push(Date.now());
+            values.push(Date.now());
 
             // Check if there are fields to update
             if (updates.length === 0) {
