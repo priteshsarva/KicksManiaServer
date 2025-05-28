@@ -97,7 +97,7 @@ const categories = {
 product.get('/allresults', (req, res) => {
 
     res.set('content-type', 'application/json');
-    let sql = `SELECT * FROM PRODUCTS ORDER BY datetime(productLastUpdated) DESC;`
+    let sql = `SELECT * FROM PRODUCTS ORDER BY datetime(productLastUpdated / 1000, 'unixepoch') DESC;`
     // let sql = `SELECT * FROM PRODUCTS WHERE productUrl = "https://oneshoess.cartpe.in/nikee-airforce-1-first-leather-ua-oneshoess.html?color=";`
 
     try {
@@ -124,7 +124,7 @@ product.get('/all', (req, res) => {
     const page = parseInt(req.query.page) || 1; // default to page 1 if not provided
     const offset = (page - 1) * limit;
 
-    const sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]' ORDER BY datetime(productLastUpdated) DESC LIMIT ? OFFSET ?`;
+    const sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]' ORDER BY datetime(productLastUpdated / 1000, 'unixepoch') DESC LIMIT ? OFFSET ?`;
 
     try {
         DB.all(sql, [limit, offset], (err, rows) => {
@@ -213,7 +213,7 @@ product.get('/search', (req, res) => {
         }
     }
 
-    sql += ` ORDER BY datetime(productLastUpdated) DESC`;
+    sql += `ORDER BY datetime(productLastUpdated / 1000, 'unixepoch') DESC`;
 
     // Fetch all matching results first
     log(sql, params)
@@ -250,7 +250,7 @@ product.get('/firstdata', (req, res) => {
     const allPromises = categories.map(category => {
         return new Promise((resolve, reject) => {
             DB.all(
-                `SELECT * FROM products  WHERE sizeName <> '[]' AND LOWER(catName) LIKE ?  ORDER BY datetime(productLastUpdated) DESC LIMIT ?`
+                `SELECT * FROM products  WHERE sizeName <> '[]' AND LOWER(catName) LIKE ?  ORDER BY datetime(productLastUpdated / 1000, 'unixepoch') DESC LIMIT ?`
                 ,
                 [`%${category.toLowerCase()}%`, itemsPerCategory],
                 (err, rows) => {
@@ -260,6 +260,8 @@ product.get('/firstdata', (req, res) => {
             );
         });
     });
+
+
 
     Promise.all(allPromises)
         .then(results => {
@@ -300,7 +302,7 @@ product.get('/results/', (req, res) => {
     const endIndex = page * limit;
 
     // let sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]';`;
-    let sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]' ORDER BY datetime(productLastUpdated) DESC`;
+    let sql = `SELECT * FROM PRODUCTS WHERE sizeName <> '[]' ORDER BY datetime(productLastUpdated / 1000, 'unixepoch') DESC`;
 
     DB.all(sql, [], (err, rows) => {
         if (err) {
@@ -337,7 +339,7 @@ product.get('/results/', (req, res) => {
 //     const dataSql = `
 //         SELECT * FROM PRODUCTS
 //         WHERE sizeName <> '[]'
-//         ORDER BY datetime(productLastUpdated) DESC
+//         ORDER BY datetime(productLastUpdated / 1000, 'unixepoch') DESC
 //         LIMIT ? OFFSET ?
 //     `;
 

@@ -257,25 +257,23 @@ async function scrapeProducts(page, categories, baseUrl) {
             const productElements = await page.evaluate(() => {
                 const elements = document.querySelectorAll('.single-product');
                 return Array.from(elements).map(element => {
-                    const sizeLabels = element.querySelectorAll('.product-details > div > div > label');
-                    const isSoldOut = element.querySelector('button')?.innerText.trim().toLowerCase() === 'sold out';
-
-                    let sizes = [];
-                    if (!isSoldOut && sizeLabels.length > 1) {
-                        sizes = Array.from(sizeLabels)
-                            .slice(1) // Skip the "Size :" label
-                            .map(label => label.innerText.trim());
-                    }
+                    const button = element.querySelector('.product-details > div > button');
+                    const sizes = button && button.innerText.trim() === 'Add to Cart'
+                        ? Array.from(element.querySelectorAll('.product-details > div > div > label'))
+                            .slice(1)
+                            .map(label => label.innerText.trim())
+                        : [];
 
                     return {
                         title: element.querySelector('.product-details > a > h6')?.innerText.trim(),
                         price: element.querySelector('.product-details > div > h6:nth-child(1)')?.innerText.trim(),
                         featuredimg: element.querySelector('.product-img-block img')?.src,
                         detailUrl: element.querySelector('.product-img-block img')?.parentElement.getAttribute('href'),
-                        sizes: sizes,
+                        sizes: Array.from(element.querySelectorAll('.product-details > div > div > label'))
+                            .slice(1) // Skip the first label if it's not a size
+                            .map(label => label.innerText.trim()),
                     };
                 });
-
             });
 
             // console.log(productElements);
