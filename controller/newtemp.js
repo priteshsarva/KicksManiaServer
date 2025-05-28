@@ -269,7 +269,9 @@ async function scrapeProducts(page, categories, baseUrl) {
                         price: element.querySelector('.product-details > div > h6:nth-child(1)')?.innerText.trim(),
                         featuredimg: element.querySelector('.product-img-block img')?.src,
                         detailUrl: element.querySelector('.product-img-block img')?.parentElement.getAttribute('href'),
-                        sizes: sizes,
+                        sizes: Array.from(element.querySelectorAll('.product-details > div > div > label'))
+                            .slice(1) // Skip the first label if it's not a size
+                            .map(label => label.innerText.trim()),
                     };
                 });
             });
@@ -707,7 +709,7 @@ async function updateProduct(product) {
             //     values.push(Date.now());
             // }
             updates.push(`productLastUpdated = ?`);
-                values.push(Date.now());
+            values.push(Date.now());
 
             // Check if there are fields to update
             if (updates.length === 0) {
