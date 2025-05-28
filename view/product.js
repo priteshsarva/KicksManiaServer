@@ -261,6 +261,8 @@ product.get('/firstdata', (req, res) => {
         });
     });
 
+   
+
     Promise.all(allPromises)
         .then(results => {
             // Merge all category results into one array
