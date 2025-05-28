@@ -699,13 +699,15 @@ async function updateProduct(product) {
                 values.push(JSON.stringify(product.sizeName));
             }
 
-            if (typeof product.productLastUpdated !== 'undefined') {
-                updates.push(`productLastUpdated = ?`);
-                values.push(product.productLastUpdated);
-            } else {
-                updates.push(`productLastUpdated = ?`);
+            // if (typeof product.productLastUpdated !== 'undefined') {
+            //     updates.push(`productLastUpdated = ?`);
+            //     values.push(product.productLastUpdated);
+            // } else {
+            //     updates.push(`productLastUpdated = ?`);
+            //     values.push(Date.now());
+            // }
+            updates.push(`productLastUpdated = ?`);
                 values.push(Date.now());
-            }
 
             // Check if there are fields to update
             if (updates.length === 0) {
