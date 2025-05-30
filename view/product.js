@@ -89,6 +89,7 @@ const categories = {
 };
 
 
+        const staleIds = [];
 
 
 
@@ -282,6 +283,121 @@ product.get('/firstdata', (req, res) => {
 
 
 
+product.get('/check-old-sizes', (req, res) => {
+    res.set('content-type', 'application/json');
+
+    const sql = `
+        SELECT *
+        FROM PRODUCTS
+        WHERE (
+           
+        );
+    `;
+    console.log("sdsdsd");
+
+
+    DB.all(sql, [], (err, rows) => {
+        if (err) {
+            console.error("❌ SQL Error:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+
+        if (rows.length === 0) {
+            return res.status(204).json({ message: "No outdated products found" });
+        }
+
+        return res.status(200).json({
+            message: "Outdated products found",
+            count: rows.length,
+            data: rows
+        });
+    });
+});
+
+
+product.post('/update-stale-sizes', (req, res) => {
+    const now = Date.now();
+    const cutoff = now - 24 * 60 * 60 * 1000; // 12 hours ago
+
+    console.log('Now:', now);
+    console.log('Cutoff:', cutoff);
+
+    const selectSQL = `SELECT productId, productLastUpdated FROM products`;
+
+    DB.all(selectSQL, [], (err, rows) => {
+        if (err) {
+            console.error('DB error:', err);
+            return res.status(500).json({ error: err.message });
+        }
+
+        console.log(`Fetched ${rows.length} rows from database.`);
+
+
+        for (let row of rows) {
+            let lastUpdated = typeof row.productLastUpdated === 'number'
+                ? row.productLastUpdated
+                : new Date(row.productLastUpdated).getTime();
+
+            console.log(`Product ${row.productId} lastUpdated: ${lastUpdated}`);
+
+            if (!isNaN(lastUpdated) && lastUpdated < cutoff) {
+                staleIds.push(row.productId);
+            }
+        }
+
+        if (staleIds.length === 0) {
+             res.status(200).json({ message: 'No outdated products found.' });
+        } else {
+             res.status(200).json({ message: 'Outdated products found.', count: staleIds })
+        }
+
+        updateNextChunk();
+    });
+
+
+    console.log('Stale IDs:', staleIds);
+
+    const chunks = staleIds.map(id => [id]); // Each chunk has one ID
+    console.log(`Divided into ${chunks.length} single-item chunks.`);
+
+    let current = 0;
+    let totalUpdated = 0;
+
+    const updateNextChunk = () => {
+        if (current >= chunks.length) {
+            const message = `All chunks processed. Total products updated: ${totalUpdated}`;
+            console.log(message);
+            return res.status(200).json({
+                message,
+                updatedIds: staleIds
+            });
+        }
+
+        const chunk = chunks[current];
+        const placeholders = chunk.map(() => '?').join(', ');
+        const updateSQL = `UPDATE products SET sizeName = '[]' WHERE productId IN (${placeholders})`;
+
+        console.log(`Updating product ${chunk[0]} (${current + 1}/${chunks.length})`);
+
+        DB.run(updateSQL, chunk, function (err) {
+            if (err) {
+                console.error(`DB error on product ${chunk[0]}:`, err);
+                if (!res.headersSent) {
+                    return res.status(500).json({ error: err.message });
+                } else {
+                    return;
+                }
+            }
+
+            console.log(`Product ${chunk[0]} updated. Changes: ${this.changes}`);
+            totalUpdated += this.changes;
+            current++;
+
+            setTimeout(updateNextChunk, 10); // Slight delay for stability
+        });
+    };
+
+});
 
 
 
