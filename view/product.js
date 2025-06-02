@@ -315,8 +315,7 @@ product.get('/check-old-sizes', (req, res) => {
 
 product.get('/update-stale-sizes', (req, res) => {
     const now = Date.now();
-    const cutoff = now - 12 * 60 * 60 * 1000; // 24 hours ago
-    const staleIds = [];
+    const cutoff = now - 24 * 60 * 60 * 1000; // 24 hours ago
     const staleIds = [];
 
     console.log('Now:', new Date(now).toISOString());
@@ -331,29 +330,7 @@ product.get('/update-stale-sizes', (req, res) => {
         }
 
         console.log(`Fetched ${rows.length} rows from database`);
-        console.log(`Fetched ${rows.length} rows from database`);
 
-        // First pass: identify all stale products
-        rows.forEach(row => {
-            try {
-                let lastUpdated = row.productLastUpdated;
-                
-                // Convert to number if it's a string
-                if (typeof lastUpdated === 'string') {
-                    lastUpdated = parseInt(lastUpdated);
-                }
-                
-                // Skip if we can't parse the date
-                if (isNaN(lastUpdated)) {
-                    console.warn(`Invalid lastUpdated for product ${row.productId}: ${row.productLastUpdated}`);
-                    return;
-                }
-
-                if (lastUpdated < cutoff) {
-                    staleIds.push(row.productId);
-                }
-            } catch (e) {
-                console.error(`Error processing product ${row.productId}:`, e);
         // First pass: identify all stale products
         rows.forEach(row => {
             try {
@@ -379,47 +356,8 @@ product.get('/update-stale-sizes', (req, res) => {
         });
 
         console.log(`Found ${staleIds.length} stale products to update`);
-        });
-
-        console.log(`Found ${staleIds.length} stale products to update`);
 
         if (staleIds.length === 0) {
-            return res.status(200).json({ message: 'No outdated products found.' });
-        }
-
-        // Process updates with transaction for better performance
-        DB.serialize(() => {
-            DB.run('BEGIN TRANSACTION');
-            
-            let updateCount = 0;
-            const updateSQL = `UPDATE products SET sizeName = ?, productLastUpdated = ? WHERE productId = ?`;
-            
-            staleIds.forEach(id => {
-                DB.run(updateSQL, ['[]', now, id], function(err) {
-                    if (err) {
-                        console.error(`Error updating product ${id}:`, err.message);
-                        // Continue with other updates even if one fails
-                    } else {
-                        updateCount += this.changes;
-                        console.log(`Updated product ${id}, rows affected: ${this.changes}`);
-                    }
-                });
-            });
-            
-            DB.run('COMMIT', [], (err) => {
-                if (err) {
-                    console.error('Transaction error:', err);
-                    return res.status(500).json({ error: 'Transaction failed', details: err.message });
-                }
-                
-                console.log(`Successfully updated ${updateCount} products`);
-                res.status(200).json({ 
-                    message: 'Update completed', 
-                    updatedCount: updateCount,
-                    totalStale: staleIds.length,
-                    staleIds: staleIds 
-                });
-            });
             return res.status(200).json({ message: 'No outdated products found.' });
         }
 
