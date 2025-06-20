@@ -46,11 +46,13 @@ const baseUrls = [
    'https://shoe-house-1.cartpe.in/',
    'https://shoebox-1.cartpe.in/',
    'https://luxurystoreresell.cartpe.in/',
-    'https://shoetrendzreseller.cartpe.in/',
+   'https://shoetrendzreseller.cartpe.in/',
    'https://foot77loocker12.cartpe.in/',
    'https://shoeplanetin.cartpe.in/',
    'https://classyshoesreseller.cartpe.in/',
    'https://shoemartt.cartpe.in/',
+   'https://fam-shoes.cartpe.in/',
+   'https://resellerzone.cartpe.in/'
 ];
 
 
