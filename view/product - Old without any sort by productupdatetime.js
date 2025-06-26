@@ -7,6 +7,7 @@ const product = express()
 import { promisify } from 'util';
 
 // Promisify DB methods for easier async/await usage
+
 DB.run = promisify(DB.run);
 DB.get = promisify(DB.get);
 
