@@ -1,4 +1,5 @@
-import puppeteer from 'puppeteer-extra';
+import puppeteer from 'puppeteer';
+import puppeteerExtra from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import * as cheerio from 'cheerio';
 import { DB } from '../connect.js';
@@ -16,7 +17,7 @@ import { exec } from 'child_process';
 
 
 // Use the stealth plugin to avoid detection
-puppeteer.use(StealthPlugin());
+puppeteerExtra.use(StealthPlugin());
 
 // Promisify DB methods for easier async/await usage
 DB.run = promisify(DB.run);
@@ -108,14 +109,13 @@ function gitAutoCommitAndPush() {
         });
     });
 }
-
 // Main function to fetch data
 async function fetchDataa(baseUrls) {
     console.log(Date.now());
     gitAutoCommitAndPush();
 
     // while (true) {
-    const browser = await puppeteer.launch({
+    const browser = await puppeteerExtra.launch({
         //old
         // executablePath: '/usr/bin/chromium', // for server
         // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
