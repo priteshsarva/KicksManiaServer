@@ -64,43 +64,47 @@ function getFirstTwoWords(inputString) {
     const words = inputString.split(' ');
     return words.slice(0, 2).join(' ');
 }
+
 function gitAutoCommitAndPush() {
     const now = new Date();
-    const dateTimeString = now.toISOString().replace('T', ' ').split('.')[0]; // Format: YYYY-MM-DD HH:mm:ss
-    const commitMessage = `DB updated on ${dateTimeString}`;
+    const dateTimeString = now.toISOString().replace('T', ' ').split('.')[0]; // "YYYY-MM-DD HH:mm:ss"
+    const commitMessage = `DB updated on ${dateTimeString}`.replace(/"/g, '\\"');
 
-    // Step 1: Add all changes
+    console.log(`📌 Commit message: "${commitMessage}"`);
+
+    // Step 1: Stage all changes
     exec('git add .', (err) => {
         if (err) {
-            console.error('❌ Error adding files:', err);
+            console.error('❌ Error adding files:', err.message);
             return;
         }
         console.log('✅ Changes staged.');
 
         // Step 2: Commit with message
-        exec(`git commit -m "${commitMessage}"`, (err) => {
+        exec(`git commit -m "${commitMessage}"`, (err, stdout, stderr) => {
             if (err) {
-                if (err.message.includes('nothing to commit')) {
+                const errorMessage = stderr || err.message;
+                if (errorMessage.includes('nothing to commit')) {
                     console.log('ℹ️ No changes to commit.');
                     return;
                 }
-                console.error('❌ Error committing:', err);
+                console.error('❌ Error committing:', errorMessage);
                 return;
             }
             console.log('✅ Changes committed.');
 
-            // Step 3: Pull before pushing to avoid remote conflicts
+            // Step 3: Pull before pushing
             exec('git pull --rebase', (err, stdout, stderr) => {
                 if (err) {
-                    console.error('❌ Error pulling from remote:', stderr || err);
+                    console.error('❌ Error pulling from remote:', stderr || err.message);
                     return;
                 }
                 console.log('✅ Pulled latest changes from remote.');
 
                 // Step 4: Push to remote
-                exec('git push', (err) => {
+                exec('git push', (err, stdout, stderr) => {
                     if (err) {
-                        console.error('❌ Error pushing to remote:', err);
+                        console.error('❌ Error pushing to remote:', stderr || err.message);
                         return;
                     }
                     console.log('✅ Changes pushed to remote repository.');
@@ -109,6 +113,7 @@ function gitAutoCommitAndPush() {
         });
     });
 }
+
 // Main function to fetch data
 async function fetchDataa(baseUrls) {
     console.log(Date.now());
