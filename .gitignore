@@ -1,2 +1,5 @@
 /controller/images
 /node_modules
+*.deb
+
+
