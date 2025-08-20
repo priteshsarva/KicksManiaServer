@@ -15,8 +15,7 @@
 # CMD ["node", "index.js"]
 
 
-
-FROM node:18-slim
+FROM node:22.2.0-slim
 
 # Install Chromium
 RUN apt-get update && apt-get install -y chromium && rm -rf /var/lib/apt/lists/*
