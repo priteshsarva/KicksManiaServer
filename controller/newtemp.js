@@ -127,7 +127,7 @@ async function fetchDataa(baseUrls) {
     //         "--disable-dev-shm-usage",
     //         "--disable-accelerated-2d-canvas",
     //         "--disable-gpu"
-    //     ],
+    //     ], 
     //     //new   
     //     headless: process.env.PUPPETEER_HEADLESS === 'true', // Convert string to boolean
     //     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
