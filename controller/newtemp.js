@@ -1,5 +1,4 @@
-import puppeteer from 'puppeteer';
-import puppeteerExtra from 'puppeteer-extra';
+import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import * as cheerio from 'cheerio';
 import { DB } from '../connect.js';
@@ -10,6 +9,7 @@ import { fileURLToPath } from 'url';
 import { rejects } from 'assert';
 import "dotenv/config";
 import { exec } from 'child_process';
+import { humanizePage, humanType } from './humanize.js';
 
 
 // const baseUrls = ['https://oneshoess.cartpe.in', 'https://reseller-store.cartpe.in'];
@@ -17,22 +17,14 @@ import { exec } from 'child_process';
 
 
 // Use the stealth plugin to avoid detection
-puppeteerExtra.use(StealthPlugin());
+puppeteer.use(StealthPlugin());
 
 // Promisify DB methods for easier async/await usage
 DB.run = promisify(DB.run);
 DB.get = promisify(DB.get);
 
-
-
-
-
-
-
-
 // Utility function to introduce delays
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 
 // Get the current directory name
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -120,28 +112,55 @@ async function fetchDataa(baseUrls) {
     gitAutoCommitAndPush();
 
     // while (true) {
-    const browser = await puppeteerExtra.launch({
-        //old
-        // executablePath: '/usr/bin/chromium', // for server
-        // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+    // const browser = await puppeteerExtra.launch({
+    //     //old
+    //     // executablePath: '/usr/bin/chromium', // for server
+    //     // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
 
-        // headless: true, // Ensures stability in recent Puppeteer versions
+    //     // headless: true, // Ensures stability in recent Puppeteer versions
+    //     defaultViewport: { width: 1080, height: 800 },
+    //     args: [
+    //         "--no-sandbox",
+    //         "--disable-setuid-sandbox",
+    //         // "--single-process",
+    //         "--no-zygote",
+    //         "--disable-dev-shm-usage",
+    //         "--disable-accelerated-2d-canvas",
+    //         "--disable-gpu"
+    //     ],
+    //     //new   
+    //     headless: process.env.PUPPETEER_HEADLESS === 'true', // Convert string to boolean
+    //     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+    // });
+
+    const browser = await puppeteer.launch({
+        headless: process.env.PUPPETEER_HEADLESS === 'true',
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
         defaultViewport: { width: 1080, height: 800 },
         args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            // "--single-process",
-            "--no-zygote",
-            "--disable-dev-shm-usage",
-            "--disable-accelerated-2d-canvas",
-            "--disable-gpu"
-        ],
-        //new   
-        headless: process.env.PUPPETEER_HEADLESS === 'true', // Convert string to boolean
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--disable-gpu',
+            '--no-zygote',
+            '--window-size=1080,800',
+            '--start-maximized'
+        ]
     });
+
     const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+    // ✅ Use realistic headers
+    await page.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+        '(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+    );
+    await page.setExtraHTTPHeaders({
+        'accept-language': 'en-US,en;q=0.9',
+        'upgrade-insecure-requests': '1'
+    });
+    // ✅ Optional: add random delay to look human
+    await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 2000) + 1000));
 
     const allproducts = [];
 
