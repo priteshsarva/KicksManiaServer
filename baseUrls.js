@@ -1,13 +1,4 @@
 const baseUrls = [
-   'https://metro-kicks.cartpe.in/',
-   'https://styleloop11.cartpe.in/',
-   'https://spshoes.cartpe.in/',
-   'https://trademarkstore.cartpe.in/',
-   'https://reseller-orders.cartpe.in/',
-   'https://greenenterprise.cartpe.in/',
-   'https://4foxindia.cartpe.in/',
-   'https://hmsales.cartpe.in/',
-   'https://shoegallery66.cartpe.in/',
    'https://thecomfortzone.cartpe.in/',
    'https://hotkickss.cartpe.in/',
    'https://laceupshoe.cartpe.in/',
@@ -52,7 +43,16 @@ const baseUrls = [
    'https://classyshoesreseller.cartpe.in/',
    'https://shoemartt.cartpe.in/',
    'https://fam-shoes.cartpe.in/',
-   'https://resellerzone.cartpe.in/'
+   'https://resellerzone.cartpe.in/',
+   'https://metro-kicks.cartpe.in/',
+   'https://styleloop11.cartpe.in/',
+   'https://spshoes.cartpe.in/',
+   'https://trademarkstore.cartpe.in/',
+   'https://reseller-orders.cartpe.in/',
+   'https://greenenterprise.cartpe.in/',
+   'https://4foxindia.cartpe.in/',
+   'https://hmsales.cartpe.in/',
+   'https://shoegallery66.cartpe.in/',   
 ];
 
 
