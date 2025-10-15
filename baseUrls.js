@@ -43,7 +43,7 @@ const baseUrls = [
    // 'https://shoemartt.cartpe.in/',
    // 'https://fam-shoes.cartpe.in/',
    // 'https://resellerzone.cartpe.in/',
-   // 'https://metro-kicks.cartpe.in/',
+   // 'https://metro-kicks.cartpe.in/', //```````````````````````
    // 'https://styleloop11.cartpe.in/',
    // 'https://spshoes.cartpe.in/',
    // 'https://trademarkstore.cartpe.in/',
