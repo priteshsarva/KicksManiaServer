@@ -1,8 +1,8 @@
 const baseUrls = [
    // 'https://thecomfortzone.cartpe.in/',
-   'https://hotkickss.cartpe.in/',
-   'https://laceupshoe.cartpe.in/',
-   'https://shoezerry1.cartpe.in/',
+   // 'https://hotkickss.cartpe.in/',
+   // 'https://laceupshoe.cartpe.in/',
+   // 'https://shoezerry1.cartpe.in/',
    'https://foot-shoppers.cartpe.in/',
    'https://sneaker-zone.cartpe.in/',
    'https://kamalenterprise.cartpe.in/',
