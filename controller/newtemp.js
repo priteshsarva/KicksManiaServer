@@ -134,7 +134,7 @@ async function fetchDataa(baseUrls) {
     // });
 
     const browser = await puppeteer.launch({
-        headless: process.env.PUPPETEER_HEADLESS === 'true',
+        headless: process.env.PUPPETEER_HEADLESS || 'true',
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
         defaultViewport: { width: 1080, height: 800 },
         args: [
