@@ -64,36 +64,37 @@ function gitAutoCommitAndPush() {
 
     console.log(`📌 Commit message: "${commitMessage}"`);
 
-    // Step 1: Stage all changes
-    exec('git add .', (err) => {
+    // Step 0: Pull latest changes before staging
+    console.log('🔄 Pulling latest changes first...');
+    exec('git pull --rebase', (err, stdout, stderr) => {
         if (err) {
-            console.error('❌ Error adding files:', err.message);
+            console.error('❌ Error pulling from remote:', stderr || err.message);
             return;
         }
-        console.log('✅ Changes staged.');
+        console.log('✅ Pulled latest changes from remote.');
 
-        // Step 2: Commit with message
-        exec(`git commit -m "${commitMessage}"`, (err, stdout, stderr) => {
+        // Step 1: Stage all changes
+        exec('git add .', (err) => {
             if (err) {
-                const errorMessage = stderr || err.message;
-                if (errorMessage.includes('nothing to commit')) {
-                    console.log('ℹ️ No changes to commit.');
-                    return;
-                }
-                console.error('❌ Error committing:', errorMessage);
+                console.error('❌ Error adding files:', err.message);
                 return;
             }
-            console.log('✅ Changes committed.');
+            console.log('✅ Changes staged.');
 
-            // Step 3: Pull before pushing
-            exec('git pull --rebase', (err, stdout, stderr) => {
+            // Step 2: Commit with message
+            exec(`git commit -m "${commitMessage}"`, (err, stdout, stderr) => {
                 if (err) {
-                    console.error('❌ Error pulling from remote:', stderr || err.message);
+                    const errorMessage = stderr || err.message;
+                    if (errorMessage.includes('nothing to commit')) {
+                        console.log('ℹ️ No changes to commit.');
+                        return;
+                    }
+                    console.error('❌ Error committing:', errorMessage);
                     return;
                 }
-                console.log('✅ Pulled latest changes from remote.');
+                console.log('✅ Changes committed.');
 
-                // Step 4: Push to remote
+                // Step 3: Push to remote
                 exec('git push', (err, stdout, stderr) => {
                     if (err) {
                         console.error('❌ Error pushing to remote:', stderr || err.message);
@@ -105,7 +106,6 @@ function gitAutoCommitAndPush() {
         });
     });
 }
-
 // Main function to fetch data
 async function fetchDataa(baseUrls) {
     console.log(Date.now());
@@ -780,15 +780,23 @@ async function updateProduct(product) {
 async function viewMore(page, productCount) {
     const count = Math.ceil(productCount / 12);
     const viewMoreButtonSelector = '#loadmore_btn_category_product';
+    let errorCount = 0; // keep track of errors
 
     await page.waitForSelector(viewMoreButtonSelector, { timeout: 10000 });
     for (let i = 0; i < count; i++) {
         try {
             await page.click(viewMoreButtonSelector);
             console.log(`Button clicked = ${i}`);
+            errorCount = 0; // reset on success
             await delay(4000);
         } catch (error) {
+            errorCount++;
             console.error('Error clicking "View More" button:', error + i);
+            if (errorCount >= 2) {
+                console.warn('⚠️ Too many errors. Stopping loop.');
+                break; // stop the loop after 2 errors
+            }
+
         }
     }
 }
