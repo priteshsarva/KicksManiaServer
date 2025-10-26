@@ -57,6 +57,7 @@ function getFirstTwoWords(inputString) {
     return words.slice(0, 2).join(' ');
 }
 
+
 function gitAutoCommitAndPush() {
     const now = new Date();
     const dateTimeString = now.toISOString().replace('T', ' ').split('.')[0]; // "YYYY-MM-DD HH:mm:ss"
@@ -64,37 +65,36 @@ function gitAutoCommitAndPush() {
 
     console.log(`📌 Commit message: "${commitMessage}"`);
 
-    // Step 0: Pull latest changes before staging
-    console.log('🔄 Pulling latest changes first...');
-    exec('git pull --rebase', (err, stdout, stderr) => {
+    // Step 1: Stage all changes
+    exec('git add .', (err) => {
         if (err) {
-            console.error('❌ Error pulling from remote:', stderr || err.message);
+            console.error('❌ Error adding files:', err.message);
             return;
         }
-        console.log('✅ Pulled latest changes from remote.');
+        console.log('✅ Changes staged.');
 
-        // Step 1: Stage all changes
-        exec('git add .', (err) => {
+        // Step 2: Commit with message
+        exec(`git commit -m "${commitMessage}"`, (err, stdout, stderr) => {
             if (err) {
-                console.error('❌ Error adding files:', err.message);
-                return;
-            }
-            console.log('✅ Changes staged.');
-
-            // Step 2: Commit with message
-            exec(`git commit -m "${commitMessage}"`, (err, stdout, stderr) => {
-                if (err) {
-                    const errorMessage = stderr || err.message;
-                    if (errorMessage.includes('nothing to commit')) {
-                        console.log('ℹ️ No changes to commit.');
-                        return;
-                    }
-                    console.error('❌ Error committing:', errorMessage);
+                const errorMessage = stderr || err.message;
+                if (errorMessage.includes('nothing to commit')) {
+                    console.log('ℹ️ No changes to commit.');
                     return;
                 }
-                console.log('✅ Changes committed.');
+                console.error('❌ Error committing:', errorMessage);
+                return;
+            }
+            console.log('✅ Changes committed.');
 
-                // Step 3: Push to remote
+            // Step 3: Pull before pushing
+            exec('git pull --rebase', (err, stdout, stderr) => {
+                if (err) {
+                    console.error('❌ Error pulling from remote:', stderr || err.message);
+                    return;
+                }
+                console.log('✅ Pulled latest changes from remote.');
+
+                // Step 4: Push to remote
                 exec('git push', (err, stdout, stderr) => {
                     if (err) {
                         console.error('❌ Error pushing to remote:', stderr || err.message);
