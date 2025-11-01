@@ -57,6 +57,7 @@ function getFirstTwoWords(inputString) {
     return words.slice(0, 2).join(' ');
 }
 
+
 function gitAutoCommitAndPush() {
     const now = new Date();
     const dateTimeString = now.toISOString().replace('T', ' ').split('.')[0]; // "YYYY-MM-DD HH:mm:ss"
@@ -105,7 +106,6 @@ function gitAutoCommitAndPush() {
         });
     });
 }
-
 // Main function to fetch data
 async function fetchDataa(baseUrls) {
     console.log(Date.now());
@@ -134,7 +134,7 @@ async function fetchDataa(baseUrls) {
     // });
 
     const browser = await puppeteer.launch({
-        headless: process.env.PUPPETEER_HEADLESS === 'true',
+        headless: process.env.PUPPETEER_HEADLESS || 'true',
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
         defaultViewport: { width: 1080, height: 800 },
         args: [
@@ -780,15 +780,23 @@ async function updateProduct(product) {
 async function viewMore(page, productCount) {
     const count = Math.ceil(productCount / 12);
     const viewMoreButtonSelector = '#loadmore_btn_category_product';
+    let errorCount = 0; // keep track of errors
 
     await page.waitForSelector(viewMoreButtonSelector, { timeout: 10000 });
     for (let i = 0; i < count; i++) {
         try {
             await page.click(viewMoreButtonSelector);
             console.log(`Button clicked = ${i}`);
+            errorCount = 0; // reset on success
             await delay(4000);
         } catch (error) {
+            errorCount++;
             console.error('Error clicking "View More" button:', error + i);
+            if (errorCount >= 2) {
+                console.warn('⚠️ Too many errors. Stopping loop.');
+                break; // stop the loop after 2 errors
+            }
+
         }
     }
 }
