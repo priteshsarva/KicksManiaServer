@@ -1,5 +1,4 @@
 const baseUrls = [
-<<<<<<< HEAD
    'https://ffhouse.cartpe.in/',
    'https://shoezone17.cartpe.in/',
    'https://reseller-store.cartpe.in/',
@@ -30,8 +29,6 @@ const baseUrls = [
    'https://4foxindia.cartpe.in/',
    'https://hmsales.cartpe.in/',
    'https://shoegallery66.cartpe.in/',
-=======
->>>>>>> 9153db98dbe9688fa5b573b17b0b1fd7209cbdda
    'https://thecomfortzone.cartpe.in/',
    'https://hotkickss.cartpe.in/',
    'https://laceupshoe.cartpe.in/',
@@ -54,42 +51,7 @@ const baseUrls = [
    'https://dmienterprisee.cartpe.in/',
    'https://mangoenterprise11.cartpe.in/',
    'https://classyslide.cartpe.in/',
-<<<<<<< HEAD
    'https://benzershoes.in/',
-
-=======
-   // 'https://benzershoes.in/', /// not a single product listed
-   'https://ffhouse.cartpe.in/',
-   'https://shoezone17.cartpe.in/',
-   'https://reseller-store.cartpe.in/',
-   'https://boot-gallery.cartpe.in/',
-   'https://dropshipresellers.cartpe.in/',
-   'https://ultimate-kicks.cartpe.in/',
-   'https://firekicks.cartpe.in/',
-   'https://signature-loafers-1.cartpe.in/',
-   'https://shoefly1.cartpe.in/',
-   'https://hypeshoe.cartpe.in/',
-   'https://kicksmania777.cartpe.in/',
-   'https://shoe-house-1.cartpe.in/',
-   'https://shoebox-1.cartpe.in/',
-   'https://luxurystoreresell.cartpe.in/',
-   'https://shoetrendzreseller.cartpe.in/',
-   'https://foot77loocker12.cartpe.in/',
-   'https://shoeplanetin.cartpe.in/',
-   'https://classyshoesreseller.cartpe.in/',
-   'https://shoemartt.cartpe.in/',
-   'https://fam-shoes.cartpe.in/',
-   'https://resellerzone.cartpe.in/',
-   'https://metro-kicks.cartpe.in/', //```````````````````````
-   'https://styleloop11.cartpe.in/',
-   'https://spshoes.cartpe.in/',
-   'https://trademarkstore.cartpe.in/',
-   'https://reseller-orders.cartpe.in/',
-   'https://greenenterprise.cartpe.in/',
-   'https://4foxindia.cartpe.in/',
-   'https://hmsales.cartpe.in/',
-   'https://shoegallery66.cartpe.in/',   
->>>>>>> 9153db98dbe9688fa5b573b17b0b1fd7209cbdda
 ];
 
 
