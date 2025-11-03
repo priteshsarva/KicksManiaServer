@@ -51,7 +51,7 @@ const baseUrls = [
    'https://dmienterprisee.cartpe.in/',
    'https://mangoenterprise11.cartpe.in/',
    'https://classyslide.cartpe.in/',
-   'https://benzershoes.in/',
+   // 'https://benzershoes.in/',
 ];
 
 
