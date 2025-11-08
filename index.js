@@ -1,4 +1,5 @@
 import { DB } from "./connect.js";
+import { exec } from 'child_process';
 
 import express, { json } from "express";
 import bodyParser from "body-parser";
@@ -116,6 +117,58 @@ const formattedDate = date.toLocaleString('en-IN', options);
         res.status(500).json({ status: 500, message: 'Internal Server Error' });
     }
 
+})
+
+
+
+app.get('/updateserver', async (req, res) => {
+    console.log("working");
+
+    const now = new Date();
+    const dateTimeString = now.toISOString().replace('T', ' ').split('.')[0]; // Format: YYYY-MM-DD HH:mm:ss
+    const commitMessage = `DB updated on ${dateTimeString}`;
+
+    // Step 1: Add all changes
+    exec('git add .', (err) => {
+        if (err) {
+            console.error('❌ Error adding files:', err);
+            return;
+        }
+        console.log('✅ Changes staged.');
+
+        // Step 2: Commit with message
+        exec(`git commit -m "${commitMessage}"`, (err) => {
+            if (err) {
+                if (err.message.includes('nothing to commit')) {
+                    console.log('ℹ️ No changes to commit.');
+                    return;
+                }
+                console.error('❌ Error committing:', err);
+                return;
+            }
+            console.log('✅ Changes committed.');
+
+            // Step 3: Pull before pushing to avoid remote conflicts
+            exec('git pull --rebase', (err, stdout, stderr) => {
+                if (err) {
+                    console.error('❌ Error pulling from remote:', stderr || err);
+                    return;
+                }
+                console.log('✅ Pulled latest changes from remote.');
+
+                // Step 4: Push to remote
+                exec('git push', (err) => {
+                    if (err) {
+                        console.error('❌ Error pushing to remote:', err);
+                        return;
+                    }
+                    console.log('✅ Changes pushed to remote repository.');
+                });
+            });
+        });
+    });
+
+    res.status(200).json({ status: 200, message: `Server updated` });
 })
 
 

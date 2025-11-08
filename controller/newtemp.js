@@ -165,7 +165,10 @@ async function fetchDataa(baseUrls) {
     const allproducts = [];
 
     // Use a for...of loop to handle asynchronous operations
-    for (const url of baseUrls) {
+    const baseUrlsPath = path.resolve(__dirname, "../baseUrls.js");
+    // console.log(baseUrlsPath);
+    for (let i = 0; i < baseUrls.length; i++) {
+        const url = baseUrls[0];
         const fullUrl = `${url}/allcategory.html`;
         let productss = []; // Initialize productss for each URL
 
@@ -180,6 +183,19 @@ async function fetchDataa(baseUrls) {
             // Add scraped products to the final array
             allproducts.push(...productss); // Use spread operator to flatten the array
         }
+        // 🔁 Rotate: first to last
+        baseUrls.push(baseUrls.shift());
+
+        // 💾 Save updated rotation to baseUrls.js (live)
+        const newFileContent = `const baseUrls = ${JSON.stringify(baseUrls, null, 3)};\n\nexport { baseUrls };`;
+        try {
+            fs.writeFileSync(baseUrlsPath, newFileContent, "utf-8");
+            console.log("File written successfully!");
+        } catch (err) {
+            console.error("Failed to write baseUrls.js:", err);
+        }
+
+        console.log(`✅ Rotated & saved baseUrls.js — next start will begin from: ${baseUrls[0]}`);
     }
 
     // Close the browser after scraping all URLs
