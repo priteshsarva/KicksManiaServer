@@ -89,29 +89,29 @@ app.use('/productbrand', productBrand)
 app.get('/devproductupdates', (req, res) => {
     res.set('content-type', 'application/json');
     // Get the current timestamp
-const timestamp = Date.now();
+    const timestamp = Date.now();
 
-// Convert the timestamp to a Date object
-const date = new Date(timestamp);
+    // Convert the timestamp to a Date object
+    const date = new Date(timestamp);
 
-// Format the date and time with time zone
-const options = {
-  weekday: 'short', // "Fri"
-  year: 'numeric', // "2017"
-  month: 'short', // "Nov"
-  day: 'numeric', // "17"
-  hour: '2-digit', // "19"
-  minute: '2-digit', // "15"
-  second: '2-digit', // "15"
-  timeZone: 'Asia/Kolkata', // Time zone for Kolkata
-  timeZoneName: 'longOffset', // "GMT+05:30"
-};
+    // Format the date and time with time zone
+    const options = {
+        weekday: 'short', // "Fri"
+        year: 'numeric', // "2017"
+        month: 'short', // "Nov"
+        day: 'numeric', // "17"
+        hour: '2-digit', // "19"
+        minute: '2-digit', // "15"
+        second: '2-digit', // "15"
+        timeZone: 'Asia/Kolkata', // Time zone for Kolkata
+        timeZoneName: 'longOffset', // "GMT+05:30"
+    };
 
-// Format the date and time
-const formattedDate = date.toLocaleString('en-IN', options);
+    // Format the date and time
+    const formattedDate = date.toLocaleString('en-IN', options);
     try {
         fetchDataa(baseUrls);
-        res.status(200).json({ status: 200, message: `Scrapping started at: ${formattedDate}`  });
+        res.status(200).json({ status: 200, message: `Scrapping started at: ${formattedDate}` });
     } catch (error) {
         console.error('Error:', error.message);
         res.status(500).json({ status: 500, message: 'Internal Server Error' });
@@ -148,22 +148,14 @@ app.get('/updateserver', async (req, res) => {
             }
             console.log('✅ Changes committed.');
 
-            // Step 3: Pull before pushing to avoid remote conflicts
-            exec('git pull --rebase', (err, stdout, stderr) => {
+
+            // Step 3: Push to remote
+            exec('git push', (err) => {
                 if (err) {
-                    console.error('❌ Error pulling from remote:', stderr || err);
+                    console.error('❌ Error pushing to remote:', err);
                     return;
                 }
-                console.log('✅ Pulled latest changes from remote.');
-
-                // Step 4: Push to remote
-                exec('git push', (err) => {
-                    if (err) {
-                        console.error('❌ Error pushing to remote:', err);
-                        return;
-                    }
-                    console.log('✅ Changes pushed to remote repository.');
-                });
+                console.log('✅ Changes pushed to remote repository.');
             });
         });
     });
