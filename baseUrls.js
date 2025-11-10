@@ -1,5 +1,4 @@
 const baseUrls = [
-   "https://shoezone17.cartpe.in/",
    "https://reseller-store.cartpe.in/",
    "https://boot-gallery.cartpe.in/",
    "https://dropshipresellers.cartpe.in/",
@@ -50,7 +49,8 @@ const baseUrls = [
    "https://dmienterprisee.cartpe.in/",
    "https://mangoenterprise11.cartpe.in/",
    "https://classyslide.cartpe.in/",
-   "https://ffhouse.cartpe.in/"
+   "https://ffhouse.cartpe.in/",
+   "https://shoezone17.cartpe.in/"
 ];
 
 export { baseUrls };
