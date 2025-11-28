@@ -85,23 +85,12 @@ function gitAutoCommitAndPush() {
                 return;
             }
             console.log('✅ Changes committed.');
-
-            // Step 3: Pull before pushing
-            exec('git pull --rebase', (err, stdout, stderr) => {
+            exec('git push', (err, stdout, stderr) => {
                 if (err) {
-                    console.error('❌ Error pulling from remote:', stderr || err.message);
+                    console.error('❌ Error pushing to remote:', stderr || err.message);
                     return;
                 }
-                console.log('✅ Pulled latest changes from remote.');
-
-                // Step 4: Push to remote
-                exec('git push', (err, stdout, stderr) => {
-                    if (err) {
-                        console.error('❌ Error pushing to remote:', stderr || err.message);
-                        return;
-                    }
-                    console.log('✅ Changes pushed to remote repository.');
-                });
+                console.log('✅ Changes pushed to remote repository.');
             });
         });
     });
