@@ -249,7 +249,7 @@ async function scrapeProducts(page, categories, baseUrl) {
         try {
             // Navigate to the product page
             await page.goto(productUrl, { waitUntil: 'networkidle2', timeout: 120000 }); // Increase timeout to 120 seconds
-            await page.waitForSelector('.single-product', { timeout: 60000 }); // Increase timeout
+            await page.waitForSelector('#product_list_div', { timeout: 60000 }); // Increase timeout
 
             // Get the total number of products
             const productCount = await page.evaluate(() => {
