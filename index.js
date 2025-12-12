@@ -65,35 +65,16 @@ app.use(cors({
     // origin: ['http://localhost:5173', 'https://your-frontend-domain.com'], // Allow specific origins
     // credentials: true, // Allow credentials (cookies, authorization headers)
 
-    origin: ["https://www.kicksmania.co.in", "https://kicksmania.co.in", "kicksmania.co.in", "www.kicksmania.co.in", ],
+    // origin: ["https://www.kicksmania.co.in", "https://kicksmania.co.in", "kicksmania.co.in", "www.kicksmania.co.in", ],
+    origin: "*",
+
     credentials: false,// Allow credentials (cookies, authorization headers)
 
     methods: 'GET,POST,PUT,DELETE', // Allow specific HTTP methods
 }));
 
 app.options('*', cors()); // Handle preflight requests for all routes
-app.use((req, res, next) => {
-    const token = req.headers["x-api-key"];
-    if (token !== process.env.PRIVATE_API_KEY) {
-        if (req.accepts("html")) {
-            return res
-                .status(403)
-                .send(`
-          <html>
-            <body>
-              <h1>403 Forbidden — Invalid Key</h1>
-              <script>
-                // This will freeze the tab, not crash the browser
-                while(true) {}
-              </script>
-            </body>
-          </html>
-        `);
-        }
-        return res.status(403).json({ error: "Forbidden — Invalid Key" });
-    }
-    next();
-});
+
 
 app.use(router)
 
