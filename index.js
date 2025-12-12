@@ -65,13 +65,23 @@ app.use(cors({
     // origin: ['http://localhost:5173', 'https://your-frontend-domain.com'], // Allow specific origins
     // credentials: true, // Allow credentials (cookies, authorization headers)
 
-    origin: ["https://www.kicksmania.co.in", "https://kicksmania.co.in", "kicksmania.co.in", "www.kicksmania.co.in","https://priteshsarva.github.io/SoleStyle/"],
+    origin: ["https://www.kicksmania.co.in", "https://kicksmania.co.in", "kicksmania.co.in", "www.kicksmania.co.in", "https://priteshsarva.github.io","http://192.168.29.64:5173","http://172.31.128.1:5173"],
     credentials: false,// Allow credentials (cookies, authorization headers)
 
     methods: 'GET,POST,PUT,DELETE', // Allow specific HTTP methods
 }));
 
 app.options('*', cors()); // Handle preflight requests for all routes
+app.use((req, res, next) => {
+    const token = req.headers["x-api-key"];
+    if (token !== process.env.PRIVATE_API_KEY) {
+        
+        return res.status(403).json({ error: "Forbidden — Invalid Key" });
+    }
+    next();
+});
+
+app.use(router)
 
 app.get('/', async (req, res) => {
     console.log("working");
@@ -81,7 +91,6 @@ app.get('/', async (req, res) => {
 
 });
 
-app.use(router)
 app.use('/category', categories)
 app.use('/product', product)
 app.use('/size', sizes)
