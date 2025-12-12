@@ -48,7 +48,12 @@ const PORT = 3001; // Force port 80 for production behind Cloudflare
 // const chromiumPath =  getChromiumPath()
 // console.log(`Path Found ${chromiumPath}`);
 
-
+const allowedOrigins = [
+  "https://www.kicksmania.co.in",
+  "https://kicksmania.co.in",
+  "kicksmania.co.in",
+  "www.kicksmania.co.in",
+];
 
 
 
@@ -60,11 +65,21 @@ app.use(cors({
     // origin: ['http://localhost:5173', 'https://your-frontend-domain.com'], // Allow specific origins
     // credentials: true, // Allow credentials (cookies, authorization headers)
 
-    origin: '*', // Allow requests from all origin
+    origin: function (origin, callback) {
+        // Allow server-side tools like Postman, curl (no origin)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Blocked by CORS — unauthorized origin: " + origin));
+        }
+    },
     credentials: false,// Allow credentials (cookies, authorization headers)
 
     methods: 'GET,POST,PUT,DELETE', // Allow specific HTTP methods
 }));
+
 app.options('*', cors()); // Handle preflight requests for all routes
 
 app.get('/', async (req, res) => {
