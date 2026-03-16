@@ -1,11 +1,4 @@
 const baseUrls = [
-   "https://classyshoesreseller.cartpe.in/",
-   "https://shoemartt.cartpe.in/",
-   "https://fam-shoes.cartpe.in/",
-   "https://reseller-orders.cartpe.in/",
-   "https://resellerzone.cartpe.in/",
-   "https://metro-kicks.cartpe.in/",
-   "https://styleloop11.cartpe.in/",
    "https://spshoes.cartpe.in/",
    "https://trademarkstore.cartpe.in/",
    "https://greenenterprise.cartpe.in/",
@@ -50,7 +43,14 @@ const baseUrls = [
    "https://luxurystoreresell.cartpe.in/",
    "https://shoetrendzreseller.cartpe.in/",
    "https://foot77loocker12.cartpe.in/",
-   "https://shoeplanetin.cartpe.in/"
+   "https://shoeplanetin.cartpe.in/",
+   "https://classyshoesreseller.cartpe.in/",
+   "https://shoemartt.cartpe.in/",
+   "https://fam-shoes.cartpe.in/",
+   "https://reseller-orders.cartpe.in/",
+   "https://resellerzone.cartpe.in/",
+   "https://metro-kicks.cartpe.in/",
+   "https://styleloop11.cartpe.in/"
 ];
 
 export { baseUrls };
