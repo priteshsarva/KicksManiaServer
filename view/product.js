@@ -322,7 +322,7 @@ product.get('/check-old-sizes', (req, res) => {
 
 product.get('/update-stale-sizes', (req, res) => {
     const now = Date.now();
-    const cutoff = now - 48 * 60 * 60 * 1000; // 24 hours ago
+    const cutoff = now - 72 * 60 * 60 * 1000; // 72 hours ago
     const staleIds = [];
 
     console.log('Now:', new Date(now).toISOString());
